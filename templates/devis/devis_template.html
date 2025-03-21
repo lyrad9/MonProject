@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Devis - Développement d'application web</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+        .invoice {
+            max-width: 800px;
+            margin: auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .company-info, .client-info, .project-info, .pricing {
+            margin-bottom: 20px;
+        }
+        h1, h2 {
+            color: #202020;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        table th, table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        table th {
+            background-color: #828385;
+            color: #fff;
+        }
+        footer {
+            text-align: center;
+            margin-top: 20px;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="invoice">
+        <header>
+
+            <img src="{{ MEDIA_URL }}images/logo_jeoline.PNG" alt="Logo" width="30%">
+                     
+        </header>
+        <section class="company-info">
+            <h2>Entreprise : Jeoline Corporates</h2>
+            <p>Email : contact@jeolinecorporates.com</p>
+            <p>Téléphone : +237 652 21 41 51</p>
+            <p>Adresse : 264 Rue de la Motte-Picquet Bonanjo, Douala, Cameroun</p>
+        </section>
+        <section class="client-info">
+            <h2>Informations du client</h2>
+            <p>Nom : {{ client_nom }}</p>
+            <p>Email : {{ client_email }}</p>
+            <p>Company : DevCompanie</p>
+        </section>
+        <section class="project-info">
+            <h2>Détails du projet</h2>
+            <p>Nom du projet : {{ service_nom }}</p>
+            <p>Description : Création d'une {{ service_nom }} vitrine avec un système de gestion de service et de generation de devis.</p>
+            <p> delai : 3 semaines</p>
+        </section>
+        <section class="pricing">
+            <h2>Résumé des coûts</h2>
+            <table>
+                <tr>
+                    <th>Description</th>
+                    <th>Coût (FCFA)</th>
+                </tr>
+                <tr>
+                    <td>Conception UI/UX</td>
+                    <td>250,000</td>
+                </tr>
+                <tr>
+                    <td>Développement front-end</td>
+                    <td>350,000</td>
+                </tr>
+                <tr>
+                    <td>Développement back-end</td>
+                    <td>500,000</td>
+                </tr>
+                <tr>
+                    <td><strong>Total</strong></td>
+                    <td><strong>1,500,000</strong></td>
+                </tr>
+            </table>
+        </section>
+
+        <footer>
+            <p>Merci de nous faire confiance pour vos besoins en développement web !</p>
+        </footer>
+    </div>
+</body>
+</html>

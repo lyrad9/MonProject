@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Demande #{{ demande.id }}</h2>
+<p><strong>Description:</strong> {{ demande.description }}</p>
+<p><strong>Service demandé:</strong> {{ demande.service.nom }}</p>
+<p><strong>Montant estimé:</strong> {{ demande.montant }}€</p>
+<p><strong>Statut:</strong> {{ demande.get_statut_display }}</p>
+
+{% if demande.devis %}
+    <p><strong>Devis généré:</strong> <a href="{{ demande.devis.fichier.url }}" target="_blank">Voir le devis</a></p>
+{% else %}
+    <p>Aucun devis n'a encore été généré pour cette demande.</p>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+
+{% block button %}
+
+    {% endblock %}
+{% block content %}
+    <!--- afficher le message de succes -->
+    {% for message in messages %}
+        <strong> {{ message }}</strong>
+    {% endfor %}
+
+ <style>
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, Helvetica, sans-serif ;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    color: #000;
+    background-color: #dedcdc;
+    overflow: auto;
+    height: auto;
+}
+header {
+    background-color: #ffffff;
+    color: #000;
+    padding: 10px 0;
+    position: relative;
+}
+
+ </style>   
+
+{% for service in services %}
+  <section id="home">
+
+      <div class="accueil">
+          <h3 style=" margin-top: 150px;"> <br>
+            Bienvenue la plateforme de la gestion de services <br>  Où
+            la comptabilité et le génie logiciel se rencontrent. <br> <br>
+            Transformez votre entreprise avec notre expertise <br>
+            en comptabilite et genie logiciel !
+              <br>
+              <br> <br> <br>
+              <a href="{% url 'apropos' %}" style=" text-decoration:none; color:#6c6b6b"><p> learn more </p></a>
+            </h3>
+                <a href="{% url 'service_gl' %}">
+                    <img src="{{ service.image.url }}" alt="developpement web" width="50%" ></a>
+            </div>
+        <p style="text-align: center; font-weight: bold; font-size: 50px;"> Nos Services </p>
+        <p style="text-align: center; font-size: 19px;">
+            Explorez nos services personnalisés en comptabilité et génie logiciel. <br>
+             Chaque solution est conçue pour répondre à vos besoins spécifiques.</p>
+    </section>
+    <main>
+
+         <div class="image-container">
+            <div class="image-box">
+              <a href="{% url 'service_comptabilite' %}" style=" color: black;">.
+                <img src="media/images/WhatsApp Image 2024-07-02 à 13.48.23_401485e9.jpg" alt="Service compta" width="50%" >
+            </a>
+                <a href="{% url 'service_comptabilite' %}" style=" text-decoration: none;"><h3>Service de Comptabilité</h3></a>
+                <p>Gestion de vos finances avec précision et efficacité.</p>
+            </div>
+            <div class="image-box">
+               <a href="{% url 'service_gl' %}" style=" text-decoration :none; color: black;">
+                <img src="media/images/WhatsApp Image 2024-07-02 à 13.48.20_ca7c369d.jpg" alt="Service 2" width="50%" height="400px"></a>
+
+                <a href="{% url 'service_gl' %}" style=" text-decoration :none;"><h3>Génie Logiciel</h3></a>
+                <p>Développement de solutions logicielles sur mesure.</p>
+            </div>
+            <div class="image-box">
+                <a href="{% url 'service_comptabilite' %}" style=" text-decoration : none; color: black;">
+                    <img src="media/images/IMG-20240702-WA0024.jpg" alt="Service 3" width="50%" height="400px"></a>
+
+                <a href="{% url 'service_comptabilite' %}" style=" text-decoration: none;"><h3>Consultation</h3></a>
+                <p>Conseils d'experts pour optimiser votre activité.</p>
+            </div>
+        </div>
+    </main>
+{% endfor %}
+
+{% endblock %}

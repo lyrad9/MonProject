@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        .btn {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h2>Confirmez votre adresse e-mail</h2>
+    <p>Merci de vous être inscrit ! Cliquez sur le bouton ci-dessous pour activer votre compte :</p>
+    <a class="btn" href="{{ activate_link }}">Activer mon compte</a>
+    <p>Si le bouton ne fonctionne pas, copiez et collez ce lien dans votre navigateur :</p>
+    <p>{{ activate_link }}</p>
+</body>
+</html>

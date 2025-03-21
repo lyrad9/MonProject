@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+
+{% block login %}    {% endblock %}
+{% block content %}
+<h1>Connexion</h1>
+
+<!-- Affichage des messages d'erreur -->
+{% if messages %}
+  {% for message in messages %}
+    <div style="color: bleu;">
+      {{ message }}
+    </div>
+  {% endfor %}
+{% endif %}
+
+<!-- Formulaire de connexion -->
+<form method="POST" action="{% url 'login' %}">
+    {% csrf_token %} <!-- Protection CSRF -->
+
+
+    <label for="username">Votre Nom :</label>
+    <input type="text" id="username" name="username" placeholder="Votre nom d'utilisateur" required> <br> <br>
+
+    <label for="password">Votre Mot de passe :</label>
+    <input type="password" id="password" name="password" placeholder="Votre mot de passe" required><br> <br>
+
+    <button type="submit">Se connecter</button>
+    <p><a href="{% url 'reset_password' %}">Mot de passe oublié ?</a></p>
+
+    <p>Vous n'avez pas de compte ? <a href="{% url 'register' %}">S'inscrire</a></p>
+
+</form>
+
+{% endblock %}

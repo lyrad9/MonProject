@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+
+<style>
+
+
+    /* Styles de la section */
+h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+/* Tableaux */
+table {
+    width: 80%;
+    margin: 0 auto;
+    border-collapse: collapse;
+    background-color: #fff;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+/* En-tête du tableau */
+th {
+    background-color: #007bff;
+    color: white;
+    padding: 12px;
+    text-align: left;
+    font-size: 16px;
+}
+
+/* Lignes du tableau */
+td {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+}
+
+/* Lignes alternées */
+tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+/* Lien de téléchargement */
+a {
+    color: #28a745;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+a:hover {
+    text-decoration: underline;
+    color: #218838;
+}
+
+/* Message aucun devis */
+td[colspan="4"] {
+    text-align: center;
+    font-weight: bold;
+    color: #666;
+    padding: 15px;
+}
+
+</style>
+    <h2>Liste des devis - {{ statut }}</h2>
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>Date</th>
+            <th>Montant</th>
+            <th>Fichier</th>
+        </tr>
+        <!-- afficher sous forme de table-->
+        {% for devis in devis_list %}
+        <tr>
+            <td>{{ devis.id }}</td>
+            <td>{{ devis.date_creation }}</td>
+            <td>{{ devis.demande.montant }} €</td>
+            <td>
+                <!--verifier s'il y a des fichiers dans la table Devis-->
+                {% if devis.fichier %}
+                    <a href="{{ devis.fichier.url }}" download>Télécharger</a>
+                {% else %}
+                    Pas de fichier
+                {% endif %}
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="4">Aucun devis disponible</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+  {% block footer %} {% endblock %}
+{% endblock %}

@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+
+{% block register %}  
+{% endblock %}
+
+{% block content %}
+<h1>Inscription</h1>
+
+<!-- Messages de succès ou d'erreur -->
+<div id="alert-container">
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }} alert-dismissable">
+        {{ message }}
+        <button type="button" class="close" aria-label="Close" onclick="this.parentElement.remove();">&times;</button>
+      </div>
+    {% endfor %}
+  {% endif %}
+</div>
+
+<style>
+  /* Style de base pour les alertes */
+  #alert-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    max-width: 400px;
+  }
+
+  .alert {
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 5px;
+    font-size: 16px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .alert button {
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: inherit;
+    cursor: pointer;
+  }
+
+  /* Styles pour différents types d'alertes */
+  .alert-success {
+    background-color: #28a745;
+    color: white;
+  }
+
+  .alert-error {
+    background-color: #dc3545;
+    color: white;
+  }
+
+  .alert-info {
+    background-color: #17a2b8;
+    color: white;
+  }
+
+  .alert-warning {
+    background-color: #ffc107;
+    color: white;
+  }
+
+  .alert-dismissable {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .alert-dismissable button {
+    color: white;
+  }
+</style>
+
+<!-- Formulaire d'inscription -->
+<form method="POST" action="{% url 'register' %}">
+  {% csrf_token %}
+  <label for="username">Username :</label>
+  <input type="text" id="username" name="username" placeholder="Nom" required>
+  <br><br>
+
+  <label for="email">Email :</label>
+  <input type="email" id="email" name="email" placeholder="Email" required>
+  <br><br>
+
+  <label for="adresse">Adresse :</label>
+  <input type="text" id="adresse" name="adresse" placeholder="Adresse" required>
+  <br><br>
+
+  <label for="entreprise">Entreprise :</label>
+  <input type="text" id="entreprise" name="entreprise" placeholder="Entreprise">
+  <br><br>
+
+  <label for="password1">Mot de passe :</label>
+  <input type="password" id="password1" name="password1" placeholder="Mot de passe" required>
+  <br><br>
+
+  <label for="password2">Confirmer le mot de passe :</label>
+  <input type="password" id="password1" name="password2" placeholder="Confirmer mot de passe" required>
+  <br><br>
+
+  <button type="submit">S'inscrire</button>
+</form>
+{% endblock %}

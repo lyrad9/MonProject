@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Facture {{ facture.pk }}</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        .container { width: 80%; margin: auto; }
+        .header { text-align: center; font-size: 20px; font-weight: bold; }
+        .section { margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; }
+        table, th, td { border: 1px solid black; padding: 10px; text-align: left; }
+        .footer { text-align: center; font-size: 12px; margin-top: 20px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">FACTURE N° {{ facture.pk }}</div>
+
+    <div class="section">
+        <strong>Date :</strong> {{ facture.date_creation }}<br>
+        <strong>Client :</strong> {{ facture.get_client.username }}<br>
+        <strong>Service :</strong> {{ facture.get_service.nom }}
+
+    </div>
+
+   <table>
+    <tr>
+        <th>Description</th>
+        <th>Montant HT</th>
+        <th>TVA</th>
+        <th>Total TTC</th>
+    </tr>
+    <tr>
+        <td>{{ facture.description }}</td>
+        <td>{{ facture.montant }} FCFA</td>
+        <td>{{ facture.taxe|default:"0" }}%</td>
+        <td>{{ facture.total_ttc }} FCFA</td>
+    </tr>
+</table>
+
+
+    <div class="footer">
+        Merci pour votre confiance.<br>
+        Société XYZ | Génie Logiciel | Web & Mobile
+    </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,19 @@
+<!-- edit_devis.html -->
+{% extends 'base.html' %}
+
+{% block title %}Modifier le devis{% endblock %}
+
+{% block content %}
+    <form method="POST">
+    {% csrf_token %}
+
+    <label for="montant">Montant :</label>
+    <input type="number" name="montant" id="montant" value="{{ devis.montant }}" required>
+
+    <label for="description">Description :</label>
+    <textarea name="description" id="description" required>{{ devis.description }}</textarea>
+
+    <button type="submit">Modifier</button>
+</form>
+
+{% endblock %}
