@@ -165,7 +165,7 @@ def register(request):
             # Traitement de la demande de service ici (exemple : enregistrer une demande)
             # Assurez-vous de bien avoir le modèle pour la demande de service
             Service.objects.create(client=utilisateur, service=demandeservice['service'],
-                                   description=demandeservice['description'])
+                                   description=demandeservice['description'], fichier=demandeservice['fichier'])
             del request.session['demandeservice']  # Supprimer la demande après traitement
 
         return redirect('login')
