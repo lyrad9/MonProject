@@ -65,6 +65,7 @@ td[colspan="4"] {
 }
 
 </style>
+<a href="{% url 'dashboard' %}" class="btn">Retour</a>
     <h2>Liste des devis - {{ statut }}</h2>
     <table>
         <tr>
@@ -94,6 +95,7 @@ td[colspan="4"] {
         </tr>
         {% endfor %}
     </table>
+
 
   {% block footer %} {% endblock %}
 {% endblock %}

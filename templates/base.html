@@ -394,11 +394,10 @@ footer {
   }
 
 
-
-
-}
 </style>
+
 <body>
+{% block entete %}
     <header>
         <div class="logo">
              <a href="{% url 'home' %}">
@@ -436,7 +435,7 @@ footer {
 
 
         </div>
-    </header>
+    </header> {% endblock %}
 
 
 {% block content %}

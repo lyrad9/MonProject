@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block entete %}   {% endblock %}
+{% block content %}
+
+
+<style>
+
+    .btn {
+    display: inline-block;
+    padding: 8px 12px;
+    text-decoration: none;
+    color: #fff;
+    border-radius: 5px;
+    transition: 0.3s ease;
+}
+
+.btn-warning {
+    background-color:#abc6ec;
+}
+
+.btn:hover {
+    opacity: 0.8;
+}
+
+.container {
+    max-width: 800px;
+    margin: auto;
+    background: white;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+}
+</style>
+<div class="container">
+     <a href="{% url 'dashboard' %}" class="btn" style="background-color:#000;">Retour</a>
+    <h2>Modifier votre demande</h2>
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <label for="service">Service demandé :</label>
+        <select name="service" id="service" required>
+            {% for service in services %}
+                <option value="{{ service.id }}" {% if service.id == demande.service.id %}selected{% endif %}>
+                    {{ service.nom }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <label for="details">Informations pour la demande de devis :</label>
+        <textarea name="details" id="details" cols="30" rows="5" required>{{ demande.description }}</textarea>
+
+        <label for="file">Associer un fichier :</label>
+        <input type="file" name="fichier" id="file" onchange="previewFile()">
+        {% if demande.fichier %}
+            <p>Fichier actuel : <a href="{{ demande.fichier.url }}" target="_blank">{{ demande.fichier.name }}</a></p>
+        {% endif %}
+
+        <p id="preview-text" style="display: none;">Fichier sélectionné : <span id="preview-name"></span></p>
+
+        <button type="submit" class="btn btn-warning">Enregistrer</button>
+
+        <button><a href="{% url 'voir_demandes_par_statut' statut='EN_ATTENTE' %}" class="btn">Annuler</a></button>
+    </form>
+
+
+</div>
+{% block footer %}   {% endblock %}
+
+<script>
+function previewFile() {
+    let fileInput = document.getElementById("file");
+    let previewText = document.getElementById("preview-text");
+    let previewName = document.getElementById("preview-name");
+
+    if (fileInput.files.length > 0) {
+        previewText.style.display = "block";
+        previewName.textContent = fileInput.files[0].name;
+    } else {
+        previewText.style.display = "none";
+    }
+}
+</script>
+{% endblock %}

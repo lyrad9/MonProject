@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+
+{% block entete %}   {% endblock %}
+{% block content %}
+
+<style>
+
+    body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 20px;
+}
+
+h2 {
+    text-align: center;
+    color: #333;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    margin-top: 20px;
+}
+
+th, td {
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: center;
+}
+
+th {
+    background-color: #007BFF;
+    color: white;
+}
+
+.btn {
+    display: inline-block;
+    padding: 8px 12px;
+    text-decoration: none;
+    color: white;
+    border-radius: 5px;
+    transition: 0.3s ease;
+}
+
+.btn-warning {
+    background-color: #FFA500;
+}
+
+.btn-danger {
+    background-color: #DC3545;
+}
+
+.btn:hover {
+    opacity: 0.8;
+}
+
+.container {
+    max-width: 800px;
+    margin: auto;
+    background: white;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Style de la barre de recherche */
+#search {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+</style>
+ <a href="{% url 'dashboard' %}" class="btn" style="background-color:#000;">Retour</a>
+<div class="container">
+    <h2>Liste des demandes - {{ statut }}</h2>
+
+    <input type="text" id="search" placeholder="Rechercher une demande..." onkeyup="filtrerDemandes()">
+
+    <table id="demandesTable">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Date d'envoi</th>
+                <th>Fichier associé</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for demande in demandes %}
+            <tr>
+                <td>{{ demande.id }}</td>
+                <td>{{ demande.date_envoi }}</td>
+                <td>
+                    {% if demande.fichier %}
+                        <a href="{{ demande.fichier.url }}" target="_blank">Voir le fichier</a>
+                    {% else %}
+                        Aucun fichier
+                    {% endif %}
+                </td>
+                <td>
+                    {% if demande.statut == "EN_ATTENTE" %}
+                        <a href="{% url 'modifier_demande' demande.id %}" class="btn btn-warning">Modifier</a>
+                    {% elif demande.statut in "VALIDÉ, REFUSÉ" %}
+                        <a href="{% url 'supprimer_demande' demande.id %}" class="btn btn-danger" onclick="return confirmSuppression(event)">Supprimer</a>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4">Aucune demande trouvée.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+</div>
+    {% block footer %}   {% endblock %}
+<script>
+function confirmSuppression(event) {
+    event.preventDefault();
+    let confirmation = confirm("Voulez-vous vraiment supprimer cette demande ?");
+    if (confirmation) {
+        window.location.href = event.target.href;
+    }
+}
+
+// Filtrage dynamique des demandes
+function filtrerDemandes() {
+    let input = document.getElementById("search").value.toLowerCase();
+    let table = document.getElementById("demandesTable");
+    let tr = table.getElementsByTagName("tr");
+
+    for (let i = 1; i < tr.length; i++) {
+        let td = tr[i].getElementsByTagName("td")[0]; // ID de la demande
+        if (td) {
+            let txtValue = td.textContent || td.innerText;
+            if (txtValue.toLowerCase().includes(input)) {
+                tr[i].style.display = "";
+            } else {
+                tr[i].style.display = "none";
+            }
+        }
+    }
+}
+</script>
+{% endblock %}
