@@ -1,12 +1,12 @@
 import os
 
 from django.contrib import messages
-from django.core.mail import send_mail
-from django.shortcuts import redirect, get_object_or_404, render
-from django.template.loader import render_to_string
+from django.core.exceptions import ObjectDoesNotExist
+from django.core.mail import send_mail, EmailMessage
+from django.shortcuts import redirect, get_object_or_404
 
-from Gestion_Service.models import DemandeService, Service, Devis
-from utilisateurs.models import User
+from Gestion_Service.models import Service
+
 
 
 # Create your views here.
@@ -101,9 +101,10 @@ def devis_form(request):
     return render(request, "devis.html", {"services": services})
 
 ####################################################################################3
+# suivre en temps les services demandees
 #  fonction pour recuperer les devis et clients connecte
+
 from django.contrib.auth.decorators import login_required
-from .models import  Facture
 from django.shortcuts import render
 from .models import Facture, Devis, DemandeService
 
@@ -111,19 +112,22 @@ from .models import Facture, Devis, DemandeService
 @login_required
 def dashboard(request):
     user = request.user
+# Comptabilise les demandes de service selon leur statut (EN_ATTENTE, VALIDEE, REFUSEE).
 
     # Récupérer les demandes de l'utilisateur
     demandes_attente = DemandeService.objects.filter(client=user, statut='EN_ATTENTE').count()
-    demandes_validees = DemandeService.objects.filter(client=user, statut='VALIDÉ').count()
-    demandes_refusees = DemandeService.objects.filter(client=user, statut='REFUSÉ').count()
+    demandes_validees = DemandeService.objects.filter(client=user, statut='VALIDEE').count()
+    demandes_refusees = DemandeService.objects.filter(client=user, statut='REFUSEE').count()
+
 
     #On récupère les Devis en filtrant via demande__client=user.
     devis_attente = Devis.objects.filter(demande__client=user, statut='EN_ATTENTE').count()
-    devis_validees = Devis.objects.filter(demande__client=user, statut='VALIDÉ').count()
-    devis_refusees = Devis.objects.filter(demande__client=user, statut='REFUSÉ').count()
+    devis_valides = Devis.objects.filter(demande__client=user, statut='VALIDÉ').count()
+    devis_refuses = Devis.objects.filter(demande__client=user, statut='REFUSÉ').count()
 
 
     # Récupérer les factures de l'utilisateur
+    factures_attente = Facture.objects.filter(devis__demande__client=user, statut='EN_ATTENTE').count()
     factures_impayees = Facture.objects.filter(devis__demande__client=user, statut='IMPAYEE').count()
     factures_payees = Facture.objects.filter(devis__demande__client=user, statut='PAYEE').count()
 
@@ -132,9 +136,12 @@ def dashboard(request):
         'demandes_attente': demandes_attente,
         'demandes_validees': demandes_validees,
         'demandes_refusees': demandes_refusees,
+
         'devis_attente': devis_attente,
-        'devis_validees': devis_validees,
-        'devis_refusees': devis_refusees,
+        'devis_valides': devis_valides,
+        'devis_refuses': devis_refuses,
+
+        'factures_attente': factures_attente,
         'factures_impayees': factures_impayees,
         'factures_payees': factures_payees
     }
@@ -146,6 +153,8 @@ def dashboard(request):
 
 from django.http import JsonResponse, FileResponse  # classe permet de renvoyer une réponse HTTP au format JSON
 
+#JSON (JavaScript Object Notation) est un format de données
+# qui permet d'échanger des informations entre une application et un serveur.
 
 
 @login_required
@@ -156,19 +165,85 @@ def refresh_dashboard(request):
 #dictionnaire Python qui contient différentes statistiques basées sur les demandes de service et les factures de l'utilisateur connecté.
     data = {
         "demandes_en_attente": DemandeService.objects.filter(client=user, statut='EN_ATTENTE').count(),
-        "demandes_validees": DemandeService.objects.filter(client=user, statut='VALIDÉ').count(),
-        "demandes_refusees": DemandeService.objects.filter(client=user, statut='REFUSÉ').count(),
+        "demandes_validees" : DemandeService.objects.filter(client=user, statut='VALIDEE').count(),
+        "demandes_refusees": DemandeService.objects.filter(client=user, statut='REFUSEE').count(),
+
         "devis_attente": Devis.objects.filter(demande__client=user, statut='EN_ATTENTE').count(),
-        "devis_validees": Devis.objects.filter(demande__client=user, statut='VALIDÉ').count(),
-        "devis_refusees": Devis.objects.filter(demande__client=user, statut='REFUSÉ').count(),
+        "devis_valides": Devis.objects.filter(demande__client=user, statut='VALIDÉ').count(),
+        "devis_refuses": Devis.objects.filter(demande__client=user, statut='REFUSÉ').count(),
+
+        "factures_attente": Facture.objects.filter(devis__demande__client=user, statut='EN_ATTENTE').count(),
         "factures_impayees": Facture.objects.filter(devis__demande__client=user, statut='IMPAYEE').count(),
         "factures_payees": Facture.objects.filter(devis__demande__client=user, statut='PAYEE').count(),
 
 
     }
 #renvoie le dictionnaire data au format JSON
-    return JsonResponse(data)
+    return JsonResponse(data) # JsonResponse(), fonction Django qui permet d'envoyer une réponse JSON à une requête.
 
+###############################################################
+#vues pour les demandes
+from django.core.files.storage import default_storage
+
+
+def voir_demandes_par_statut(request, statut):
+    user = request.user
+    """Affiche la liste des demandes du client selon leur statut"""
+    demandes = DemandeService.objects.filter(client=request.user, statut=statut)
+
+    return render(request, 'demandes/liste_demandes.html', {'demandes': demandes, 'statut': statut})
+
+
+def modifier_demande(request, demande_id):
+    user = request.user
+    """Permet au client de modifier sa demande et de la remettre en attente"""
+    demande = get_object_or_404(DemandeService, id=demande_id, client=request.user)
+
+    if request.method == "POST":
+        description = request.POST.get("details")
+        service_id = request.POST.get("service")
+        fichier = request.FILES.get("fichier")
+
+        # Vérifier si le service existe
+        try:
+            service = Service.objects.get(id=int(service_id))
+        except (ValueError, Service.DoesNotExist):
+            messages.error(request, "Service invalide.")
+            return redirect('modifier_demande', demande_id=demande.id)
+
+        # Mise à jour des données
+        demande.description = description
+        demande.service = service
+        demande.statut = "EN_ATTENTE"  # Revenir en attente après modification
+
+        if fichier:
+            if demande.fichier:
+                default_storage.delete(demande.fichier.path)  # Supprime l'ancien fichier
+            demande.fichier = fichier  # Ajoute le nouveau fichier
+
+        demande.save()
+
+        messages.success(request, "Votre demande a été modifiée et renvoyée avec succès.")
+        return redirect('voir_demandes_par_statut', statut="EN_ATTENTE")
+
+    services = Service.objects.all()
+    return render(request, 'demandes/modifier_demande.html', {'demande': demande, 'services': services})
+
+
+def supprimer_demande(request, demande_id):
+    user = request.user
+    """Supprime une demande validée ou refusée"""
+    demande = get_object_or_404(DemandeService, id=demande_id, client=request.user)
+
+    if demande.statut in ["VALIDÉ", "REFUSÉ"]:
+        if demande.fichier:
+            default_storage.delete(demande.fichier.path)  # Supprime le fichier associé
+        demande.delete()
+        messages.success(request, "Votre demande a été supprimée.")
+    else:
+        messages.error(request, "Vous ne pouvez pas supprimer une demande en attente.")
+
+    return redirect('voir_demandes_par_statut', statut=demande.statut)
 
 #######################################################################
 #vue Django qui génère un devis en PDF pour une demande de service spécifique, 
@@ -176,7 +251,7 @@ def refresh_dashboard(request):
 
 from django.http import HttpResponse
 from django.core.files.base import ContentFile
-from weasyprint import HTML, CSS
+from weasyprint import HTML
 from django.conf import settings
 
 
@@ -214,14 +289,33 @@ def generate_devis_pdf(request, demande_id):  #http://127.0.0.1:8000/devis/gener
 
     #2.dictionnaire context qui contient toutes les informations nécessaires pour générer le devis (nom du client, email, entreprise, etc.).
 
+    # 🔹 3. Préparer les données du contexte
     client = demande.client
 
     context = {
+        # Informations du client
         "client_nom": client.username,
         "client_email": client.email,
-        "client_entreprise": client.first_name,
+        "client_entreprise": client.first_name,  # Si c'est le nom de l'entreprise
+
+        # Informations du devis
         "devis": devis,
-        
+        "validite": devis.validite,
+        "description": devis.description,
+        "duree": devis.duree,
+
+        # Coûts détaillés
+        "cout_backend": devis.cout_backend,
+        "cout_frontend": devis.cout_frontend,
+        "cout_test": devis.cout_test,
+        "cout_maintenance": devis.cout_maintenance,
+        "cout_hebergement": devis.cout_hebergement if devis.cout_hebergement else 0,
+        "cout_nom_de_domaine": devis.cout_nom_de_domaine if devis.cout_nom_de_domaine else 0,
+
+        # Totaux
+        "total_ht": devis.calcul_total_ht,
+        "tva": devis.calcul_tva,
+        "total_ttc": devis.calcul_total_ttc,
     }
 
     # 🔹 3. générer le contenu HTML du devis en utilisant le contexte défini précédemment.
@@ -235,14 +329,6 @@ def generate_devis_pdf(request, demande_id):  #http://127.0.0.1:8000/devis/gener
 
     # 🔹 5. Définir le chemin et enregistrer le fichier
     devis_filename = f"devis_{demande.id}.pdf"
-    devis_path = os.path.join(settings.MEDIA_ROOT, 'devis', devis_filename)
-
-    # S'assurer que le dossier existe
-    os.makedirs(os.path.dirname(devis_path), exist_ok=True)
-
-    '''Écrire le fichier sur le disque
-    with open(devis_path, 'wb') as f:
-        f.write(pdf_file)'''
 
     # Si un fichier PDF existait déjà pour ce devis, on le supprime avant d'enregistrer le nouveau.
     if devis.fichier:
@@ -253,6 +339,10 @@ def generate_devis_pdf(request, demande_id):  #http://127.0.0.1:8000/devis/gener
     # 🔹 6. On enregistre le fichier PDF dans le champ fichier du modèle Devis.
     devis.fichier.save(devis_filename, ContentFile(pdf_file), save=True)
 
+
+    # 🔹 7. renvoie une réponse HTTP avec un lien pour télécharger le fichier PDF.
+    pdf_url = settings.MEDIA_URL + f"devis/{devis_filename}"
+
     # envoyer email à l'utilisateur correspondant
 
     if devis.demande:
@@ -260,10 +350,11 @@ def generate_devis_pdf(request, demande_id):  #http://127.0.0.1:8000/devis/gener
     else:
         service_nom = "service inconnu"
 
-
     send_mail(
         subject='devis envoye',
-        message=f"Votre devis pour un {service_nom} a ete envoyer. /n Veuillez vous connectez pour le voir.",
+        message=f"""Votre devis pour un {service_nom} a ete envoyer.
+        Vous pouvez le telechage en cliquant sur ce lien : http://127.0.0.1:8000/media/devis/devis_1.pdf 
+        ou Veuillez vous connectez pour le voir.""",
         from_email=settings.ADMIN_EMAIL,
         recipient_list=[demande.client.email],
         fail_silently=False,
@@ -271,8 +362,7 @@ def generate_devis_pdf(request, demande_id):  #http://127.0.0.1:8000/devis/gener
 
     print(f"Email envoyé à {demande.client.email}")
 
-    # 🔹 7. renvoie une réponse HTTP avec un lien pour télécharger le fichier PDF.
-    pdf_url = settings.MEDIA_URL + f"devis/{devis_filename}"
+
     return HttpResponse(f"Devis généré avec succès ! <a href='{pdf_url}' target='_blank'>Télécharger le PDF</a>")
 
 
@@ -280,8 +370,8 @@ def generate_devis_pdf(request, demande_id):  #http://127.0.0.1:8000/devis/gener
 # methode pour supprimer l'ancien fichier lorsqu'un devis est supprime.
 
 def delete(self, *args, **kwargs):
-    if self.fichier:
-        self.fichier.delete(save=False)
+    if self.fichier and os.path.exists(self.fichier.path):
+        os.remove(self.fichier.path)
     super().delete(*args, **kwargs)
 
 ###################################################3
@@ -301,7 +391,8 @@ def voir_devis(request, statut):
 
     #fonction "render"  pour afficher un template HTML (devis/voir_devis.html) en lui passant un contexte (un dictionnaire de données).
 
-    return render(request, 'devis/voir_devis.html', {'devis_list': devis_list, 'statut': statut,})
+    return render(request, 'devis/voir_devis.html', {'devis_list': devis_list, 'statut': statut,
+                                                     'message': "Aucun devis trouvé avec ce statut." if not devis_list else "",})
 
 
 ########################################################
@@ -387,50 +478,103 @@ def validate_devis(request, devis_id):
 #GENERER LA FACTURE
 
 def facture_pdf_view(request, facture_id):
-    """Vue pour générer et afficher une facture en PDF."""
-    facture = Facture.objects.filter(pk=facture_id).first()
-    if not facture:
-        return HttpResponse("Facture introuvable", status=404)
+    """Affiche une facture existante et envoie un email si elle est validée."""
+    try:
+        # Récupérer la facture
+        facture = get_object_or_404(Facture, pk=facture_id)
 
-    context = {'facture': facture}
-    html_string = render_to_string('facture_template.html', context)
+        # Générer le PDF si nécessaire
+        if not facture.fichier_pdf or not os.path.exists(facture.fichier_pdf.path):
+            if not facture.generate_pdf():
+                return HttpResponse("Erreur lors de la génération du PDF.", status=500)
 
-    # ✅ Vérification avant d'utiliser STATIC_ROOT
-    css_path = os.path.join(settings.STATIC_ROOT, 'css/facture.css') if settings.STATIC_ROOT else None
+        # Ouvrir le fichier PDF
+        with open(facture.fichier_pdf.path, 'rb') as pdf_file:
+            pdf_content = pdf_file.read()
 
-    # ✅ Vérifie que le fichier CSS existe avant de l'ajouter
-    stylesheets = [CSS(css_path)] if css_path and os.path.exists(css_path) else []
+        # Vérifier si la facture est validée et envoyer un email
+        if facture.devis and facture.devis.statut == 'VALIDÉ':
+            client = facture.get_client()
+            service = facture.get_service()
 
-    pdf_file = HTML(string=html_string).write_pdf(stylesheets=stylesheets)
+            client_email = client.email if client else None
+            service_nom = service.nom if service else "Service inconnu"
 
-    '''   if facture.devis:
-        service_nom = facture.devis.demande.service.nom
-    else:
-        service_nom = "service inconnu"
+            if client_email:  # Vérification si l'email existe
+                try:
+                    email = EmailMessage(
+                        subject="Votre facture est disponible",
+                        body=f"Bonjour {client.username},\n\n"
+                             f"Votre devis pour le service '{service_nom}' a été validé.\n"
+                             f"Votre facture est maintenant disponible dans votre espace client.\n\n"
+                             f"Cordialement,\nL'équipe de gestion.",
+                        from_email=settings.ADMIN_EMAIL,
+                        to=[client_email],
+                    )
+                    email.attach(
+                        filename=f"{facture.numero_facture or facture.pk}.pdf",
+                        content=pdf_content,
+                        mimetype="application/pdf"
+                    )
+                    email.send(fail_silently=False)
+                    print(f"✅ Email avec facture envoyé à {client_email}")
+                except Exception as e:
+                    print(f"❌ Erreur lors de l'envoi de l'email : {e}")
 
-    send_mail(
-        subject='devis envoye',
-        message=f"Votre devis pour un {service_nom} a ete envoyer. /n Veuillez vous connectez pour le voir.",
-        from_email=settings.ADMIN_EMAIL,
-        recipient_list=[devis.client.email],
-        fail_silently=False,
-    )
+        # Retourner le PDF
+        response = HttpResponse(pdf_content, content_type='application/pdf')
+        response['Content-Disposition'] = f'inline; filename="{facture.numero_facture or facture.pk}.pdf"'
+        return response
 
-    print(f"Email envoyé à {demande.client.email}")'''
+    except ObjectDoesNotExist:
+        return HttpResponse("Facture introuvable.", status=404)
 
-    response = HttpResponse(pdf_file, content_type='application/pdf')
-    response['Content-Disposition'] = f'inline; filename="facture_{facture.pk}.pdf"'
-    return response
+    except Exception as e:
+        print(f"❌ Erreur générale : {e}")
+        return HttpResponse("Erreur interne du serveur.", status=500)
+
 
 #####################################
 
-def telecharger_facture(request, facture_id): # http://127.0.0.1:8000/facture/1/download/.
+@login_required
+def voir_facture(request, statut):
+    """
+    Affiche les devis de l'utilisateur en fonction de leur statut (EN_ATTENTE, VALIDÉ, REFUSÉ)
+    """
+    user = request.user
 
-    """Permet de télécharger une facture en PDF."""
-    facture = Facture.objects.get(pk=facture_id)
-    if facture.fichier_pdf:
-        return FileResponse(facture.fichier_pdf.open(), content_type='application/pdf')
-    else:
+    # Filtrage des devis par utilisateur et statut
+    # On utilise le modèle Devis pour récupérer tous les devis qui correspondent à deux critères (le client associe a la demande et le statut)
+    devis_list = Devis.objects.filter(demande__client=user, statut=statut, )
+
+    # fonction "render"  pour afficher un template HTML (devis/voir_devis.html) en lui passant un contexte (un dictionnaire de données).
+
+    return render(request, 'devis/voir_devis.html', {'devis_list': devis_list, 'statut': statut,
+                                                     'message': "Aucun devis trouvé avec ce statut." if not devis_list else "", })
+
+#############################################################
+
+@login_required
+def telecharger_facture(request, facture_id):
+    """Permet au client de télécharger une facture en PDF."""
+    facture = get_object_or_404(Facture, pk=facture_id)
+
+    # Vérifier si la facture appartient bien au client connecté
+    if facture.devis and facture.devis.demande.client != request.user:
+        return HttpResponse("Accès refusé : cette facture ne vous appartient pas.", status=403)
+
+    # Vérifier si le fichier PDF existe
+    if not facture.fichier_pdf or not os.path.exists(facture.fichier_pdf.path):
         return HttpResponse("Facture non disponible", status=404)
+
+    # Ouvrir et retourner le fichier PDF en téléchargement
+    try:
+        response = FileResponse(facture.fichier_pdf.open('rb'), content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="{facture.numero_facture or facture.pk}.pdf"'
+        return response
+    except Exception as e:
+        print(f"❌ Erreur lors de l'ouverture du fichier PDF : {e}")
+        return HttpResponse("Erreur lors du téléchargement de la facture.", status=500)
+
 
 

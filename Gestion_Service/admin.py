@@ -18,7 +18,7 @@ class AdminCategorie(admin.ModelAdmin):
 
 ####################################################################
 class AdminFacture(admin.ModelAdmin):
-    list_display = ('montant', 'devis' ,'get_client', 'get_service', 'date_creation','statut','bouton_generer_facture')
+    list_display = ('devis' ,'get_client', 'get_service', 'date_creation','statut','bouton_generer_facture')
     list_filter = ('statut', 'devis')
     search_fields = ('statut',)
     readonly_fields = ('date_creation',)
