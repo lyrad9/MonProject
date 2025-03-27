@@ -6,7 +6,7 @@ from django.db import models
 from django.template.loader import render_to_string
 
 from django.templatetags.static import static
-from weasyprint import HTML, CSS
+
 
 from AppGestionService import settings
 
@@ -35,6 +35,14 @@ class Categorie(models.Model):
 
 from django.urls import reverse
 
+# ✅ Modèle Sous-service
+class SubService(models.Model):
+    # Sous-service de base avec son nom
+    name = models.CharField(max_length=100, verbose_name="Nom du sous-service")
+
+    def __str__(self):
+        return self.name
+    
 # ✅ Modèle Services
 class Service(models.Model):
     nom = models.CharField(max_length=255)
@@ -42,7 +50,9 @@ class Service(models.Model):
     image = models.ImageField(upload_to= 'images', blank=True, null=True)
     date_creation = models.DateField(auto_now=True)
     # une categorie contient plusieurs services.
-    categorie = models.ForeignKey(Categorie, related_name = 'services',on_delete= models.CASCADE)
+    categorie = models.ForeignKey(Categorie, related_name='services', on_delete=models.CASCADE)
+    # Pour recuperer tous les sous services associés à un service(optionnel)
+    sub_services = models.ManyToManyField(SubService, through='ServicePricing', related_name='services')
 
     class Meta:
         ordering = ['-date_creation'] #LIFview
@@ -58,6 +68,18 @@ class Service(models.Model):
     
 #######################################################################
 
+class ServicePricing(models.Model):
+    # Table intermédiaire pour gérer les prix variables par service
+    service = models.ForeignKey(Service, on_delete=models.CASCADE)
+    sub_service = models.ForeignKey(SubService, on_delete=models.CASCADE)
+    price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Prix")
+
+    class Meta:
+        unique_together = ('service', 'sub_service')  # Évite les doublons
+
+    def __str__(self):
+        return f"{self.service} - {self.sub_service} : {self.price}"
+
 from utilisateurs.models import User
 
 # ✅ Modèle Demande
@@ -70,6 +92,8 @@ class DemandeService(models.Model):
     service = models.ForeignKey(Service, on_delete=models.CASCADE, related_name="demandes") # est demandé N fois
     client = models.ForeignKey(User, on_delete=models.CASCADE, related_name="demandes") # demande N fois
     fichier = models.FileField(upload_to='demandes/', blank=True, null=True)  # Permetre de stocke un fichier dans la demande
+    sub_services = models.ManyToManyField(SubService, through='SelectedSubService', related_name='service_requests')
+    price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Montant total",default=0)
 
     STATUT_CHOICES = [
         ('EN_ATTENTE', 'En attente'),
@@ -86,7 +110,17 @@ class DemandeService(models.Model):
 
     def __str__(self):
         return f"Demande {self.pk} - {self.statut}"
-    
+class SelectedSubService(models.Model):
+    # Stockage des sous-services sélectionnés avec leur prix au moment de la demande
+    service_request = models.ForeignKey(DemandeService, on_delete=models.CASCADE)
+    sub_service = models.ForeignKey(SubService, on_delete=models.CASCADE)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+
+    class Meta:
+        unique_together = ('service_request', 'sub_service')
+
+    def __str__(self):
+        return f"{self.sub_service} - {self.price}"  
 ############################################################################
 # model devis
 from django.core.files.storage import FileSystemStorage
@@ -94,8 +128,9 @@ from django.core.files.storage import FileSystemStorage
 fs = FileSystemStorage(location='media/devis')
 
 class Devis(models.Model):
-    demande = models.OneToOneField(DemandeService, on_delete=models.CASCADE, related_name='devis')
-    fichier = models.FileField( upload_to='devis/',null=True, blank=True) #  stocker les fichiers dans media/devis/.
+    demande = models.ForeignKey(DemandeService, related_name='devis', on_delete=models.CASCADE)    
+    """ demande = models.OneToOneField(DemandeService, on_delete=models.CASCADE, related_name='devis') """
+    fichier = models.FileField(upload_to='devis/', null=True, blank=True)  #  stocker les fichiers dans media/devis/.
     date_creation = models.DateTimeField(auto_now_add=True)
     STATUT_CHOICES = [
         ('EN_ATTENTE', 'En attente'),
@@ -115,7 +150,7 @@ class Devis(models.Model):
 ###############################################################
 
 class Facture(models.Model):
-
+    client = models.ForeignKey(User, on_delete=models.CASCADE, related_name="factures")
     description = models.TextField(null=True, max_length=1000, blank=True)
 
     date_creation = models.DateField(auto_now_add=True)

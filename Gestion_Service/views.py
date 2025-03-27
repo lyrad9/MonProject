@@ -1,16 +1,62 @@
 import os
-
+import logging
 from django.contrib import messages
 from django.core.mail import send_mail
 from django.shortcuts import redirect, get_object_or_404, render
 from django.template.loader import render_to_string
+from django.contrib.auth.decorators import login_required
 
-from Gestion_Service.models import DemandeService, Service, Devis
+from Gestion_Service.models import DemandeService, Service, Devis, ServicePricing
 from utilisateurs.models import User
-
+from .forms import ServiceRequestForm
 
 # Create your views here.
 
+""" @login_required """
+def create_service_request(request, service_id):
+    """
+    Vue pour créer une nouvelle demande de service
+    """
+    service = get_object_or_404(Service, id=service_id)
+    subservices = ServicePricing.objects.filter(service=service)
+    data = [{'id': ss.sub_service.id, 'name': ss.sub_service.name, 'price': str(ss.price)} for ss in subservices]
+
+    if request.method == 'POST':
+        form = ServiceRequestForm(request.POST, request.FILES)
+        
+        if form.is_valid():
+            # Créer la demande sans la sauvegarder
+            service_request = form.save(commit=False)
+            service_request.service = service
+            service_request.client = request.user
+            service_request.statut = 'EN_ATTENTE'
+            
+            # Calculer le montant total
+            selected_subservices = ServicePricing.objects.filter(
+                service=service,
+                sub_service__id__in=request.POST.getlist('sub_services')
+            )
+            service_request.price = sum(ss.price for ss in selected_subservices)
+            
+            # Sauvegarder la demande
+            service_request.save()
+            
+            # Ajouter les sous-services sélectionnés
+            for pricing in selected_subservices:
+                service_request.sub_services.add(pricing.sub_service, through_defaults={'price': pricing.price})
+            
+            messages.success(request, 'Votre demande a été créée avec succès !')
+            """return redirect('request_detail', pk=service_request.pk)"""
+        else:
+            messages.error(request, 'Veuillez corriger les erreurs dans le formulaire.')
+    else:
+        form = ServiceRequestForm()
+    
+    return render(request, 'services/create_request.html', {
+        'form': form,
+        'service': service,
+        'subservices': data,
+    })
 
 def service_comptabilite(request):
     # Ici, tu peux récupérer les informations spécifiques du client (comme entreprise).
@@ -20,11 +66,12 @@ def service_comptabilite(request):
 def service_gl(request):
 
     services = Service.objects.all()
+   
 
     return render(request, 'services/service_gl.html',{'services':services})
 
 
-
+# pour traiter une demande de service
 def devis_form(request):
     # Récupérer tous les services disponibles pour le formulaire
     services = Service.objects.all()
@@ -103,7 +150,7 @@ def devis_form(request):
 ####################################################################################3
 #  fonction pour recuperer les devis et clients connecte
 from django.contrib.auth.decorators import login_required
-from .models import  Facture
+from .models import  Facture, ServicePricing
 from django.shortcuts import render
 from .models import Facture, Devis, DemandeService
 
@@ -176,7 +223,7 @@ def refresh_dashboard(request):
 
 from django.http import HttpResponse
 from django.core.files.base import ContentFile
-from weasyprint import HTML, CSS
+# from weasyprint import HTML, CSS
 from django.conf import settings
 
 
@@ -432,5 +479,19 @@ def telecharger_facture(request, facture_id): # http://127.0.0.1:8000/facture/1/
         return FileResponse(facture.fichier_pdf.open(), content_type='application/pdf')
     else:
         return HttpResponse("Facture non disponible", status=404)
+
+@login_required
+def request_detail(request, pk):
+    """
+    Vue pour afficher les détails d'une demande de service
+    """
+    demande = get_object_or_404(DemandeService, pk=pk, client=request.user)
+    
+    context = {
+        'demande': demande,
+        'subservices': demande.sub_services.all(),
+    }
+    
+    return render(request, 'services/request_detail.html', context)
 
 

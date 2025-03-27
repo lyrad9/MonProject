@@ -1,11 +1,20 @@
-{% extends 'base.html' %} <!-- Hérite de la structure de base.html -->
+{% extends 'base.html' %}
+<!-- Hérite de la structure de base.html -->
 
-{% block title %}Page d'Accueil{% endblock %} <!-- Définir un titre personnalisé -->
-{% block propos %} <a href="{% url 'apropos' %}"></a>{% endblock %}
-{% block logo %}<img src="media/images/logo jeoline.PNG" alt="logo de l'entreprise" width="50%"> {% endblock %}
-{% block content %}
-    <center>
-        <h2>Bienvenue sur notre plateforme !</h2>
-        <p>Transformez votre entreprise grâce à nos services de comptabilité et de génie logiciel.</p>
-    </center>
+{% block title %}Page d'Accueil{% endblock %}
+<!-- Définir un titre personnalisé -->
+{% block propos %} <a href="{% url 'apropos' %}"></a>{% endblock %} {% block
+logo %}<img
+  src="media/images/logo jeoline.PNG"
+  alt="logo de l'entreprise"
+  width="50%"
+/>
+{% endblock %} {% block content %}
+<center>
+  <h2>Bienvenue sur notre plateforme !</h2>
+  <p>
+    Transformez votre entreprise grâce à nos services de comptabilité et de
+    génie logiciel.
+  </p>
+</center>
 {% endblock %}

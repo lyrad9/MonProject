@@ -1,5 +1,6 @@
-
 from django.contrib import admin
+from django.urls import reverse
+from django.utils.html import format_html
 from Gestion_Service.models import Facture, DemandeService, Service, Categorie, Devis
 
 
@@ -76,9 +77,6 @@ class AdminDemandeService(admin.ModelAdmin):
 
 
 #############################################################################
-from django.urls import reverse
-from django.utils.html import format_html
-
 
 class AdminDevis(admin.ModelAdmin):
     list_display = ('id','demande', 'fichier','date_creation','bouton_generer_devis',)

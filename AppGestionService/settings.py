@@ -123,8 +123,16 @@ WSGI_APPLICATION = 'AppGestionService.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
-
 DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": "prest-services",
+        "USER": "postgres",
+        "PASSWORD": "darylboris",      
+        "PORT": "5432",
+    }
+}
+"""DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'app_bd',
@@ -136,8 +144,7 @@ DATABASES = {
             'init_command': "SET default_storage_engine=INNODB;"
         }
     }
-}
-
+}"""
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators

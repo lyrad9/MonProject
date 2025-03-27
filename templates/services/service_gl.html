@@ -1,49 +1,82 @@
-{% extends 'base.html' %} <!-- Hérite de la structure de base.html -->
+{% extends 'base.html' %}
+<!-- Hérite de la structure de base.html -->
 
-{% block title %}Page d'Accueil{% endblock %} <!-- Définir un titre personnalisé -->
+{% block title %}Page d'Accueil{% endblock %}
+<!-- Définir un titre personnalisé -->
 
 {% block content %}
-    <center>
-        <h2>Bienvenue la plateforme de vos services en génie logiciel </h2>
+<center>
+  <h2>Bienvenue la plateforme de vos services en génie logiciel</h2>
 
-        <div class="accueil">
-          <h3> <br>
-            Bienvenue la plateforme de vos services en génie logiciel . <br>
-            Transformez votre entreprise avec notre expertise ! <br>
-          </h3>
-            </div>
-
-    </center>
+  <div class="accueil">
+    <h3>
+      <br />
+      Bienvenue la plateforme de vos services en génie logiciel . <br />
+      Transformez votre entreprise avec notre expertise ! <br />
+    </h3>
+  </div>
+</center>
 <main>
-    {% for service in services %}
+  {% for service in services %}
 
-        <div class="image-container">
-            <div class="image-box">
-              <a href="{% url 'service_gl' %}" style=" text-decoration :none; color: black;">
-                 <img src="{{ service.image.url }}" alt="developpement web"  width="100%" height="400px">
-            </a>
-                <a href="{% url 'service_gl' %}" style=" text-decoration: none;"><h3>Developpement d'application Mobile</h3></a>
-                <p>Développement d'application mobile portable et maintenable.</p>
-                <button type="submit"><a href="{% url 'devis_form' %}"> démande un devis </a></button>
-            </div>
-            <div class="image-box">
-               <a href="{% url 'service_gl' %}" style=" text-decoration :none; color: black;">
-                <img src="media/images/WhatsApp Image 2024-07-02 à 13.48.20_ca7c369d.jpg" alt="Service 2" width="100%" height="400px"></a>
+  <div class="image-container">
+    <div class="image-box">
+      <a
+        href="{% url 'service_gl' %}"
+        style="text-decoration: none; color: black"
+      >
+        <img
+          src="{{ service.image.url }}"
+          alt="developpement web"
+          width="100%"
+          height="400px"
+        />
+      </a>
+      <a href="{% url 'service_gl' %}" style="text-decoration: none"
+        ><h3>Developpement d'application Mobile</h3></a
+      >
+      <p>Développement d'application mobile portable et maintenable.</p>
+      <button type="submit">
+        <a href="{% url 'devis_form' %}"> démande un devis </a>
+      </button>
+    </div>
+    <div class="image-box">
+      <a
+        href="{% url 'service_gl' %}"
+        style="text-decoration: none; color: black"
+      >
+        <img
+          src="media/images/WhatsApp Image 2024-07-02 à 13.48.20_ca7c369d.jpg"
+          alt="Service 2"
+          width="100%"
+          height="400px"
+      /></a>
 
-                <a href="{% url 'service_gl' %}" style=" text-decoration :none;"><h3>Developpement d'application Web</h3></a>
-                <p>Développement de solutions informatique Web sur mesure et securise.</p>
-                 <button type="submit"><a href="{% url 'devis_form' %}"> démande un devis </a></button>
-            </div>
-            <div class="image-box">
-                 <a href="{% url 'service_gl' %}" style=" text-decoration :none;">
-                    <img src="{{ service.image.url }}" alt="Service 3" width="100%" height="400px"></a>
+      <a href="{% url 'service_gl' %}" style="text-decoration: none"
+        ><h3>Developpement d'application Web</h3></a
+      >
+      <p>Développement de solutions informatique Web sur mesure et securise.</p>
+      <button type="submit">
+        <a href="{% url 'devis_form' %}"> démande un devis </a>
+      </button>
+    </div>
+    <div class="image-box">
+      <a href="{% url 'service_gl' %}" style="text-decoration: none">
+        <img
+          src="{{ service.image.url }}"
+          alt="Service 3"
+          width="100%"
+          height="400px"
+      /></a>
 
-                 <a href="{% url 'service_gl' %}" style=" text-decoration :none;"><h3>Maintenance</h3></a>
-                <p>Conseils d'experts pour optimiser vos solutions informatiques.</p>
-                <button type="submit"><a href="{% url 'devis_form' %}"> démande un devis </a></button>
-            </div>
-        </div>
-    </main>
-{% endfor %}
-{% endblock %}
-
+      <a href="{% url 'service_gl' %}" style="text-decoration: none"
+        ><h3>Maintenance</h3></a
+      >
+      <p>Conseils d'experts pour optimiser vos solutions informatiques.</p>
+      <button type="submit">
+        <a href="{% url 'devis_form' %}"> démande un devis </a>
+      </button>
+    </div>
+  </div>
+</main>
+{% endfor %} {% endblock %}

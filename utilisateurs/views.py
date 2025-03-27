@@ -152,7 +152,8 @@ def register(request):
             from_email=settings.EMAIL_HOST_USER,
             recipient_list=[utilisateur.email],
             fail_silently=False,
-            html_message=email_body  # ✅ permet d'envoyer email en html.
+            html_message=email_body
+              # ✅ permet d'envoyer email en html.
         )
 
         print(f"Email envoyé à {utilisateur.email}")
@@ -164,7 +165,7 @@ def register(request):
         if demandeservice:
             # Traitement de la demande de service ici (exemple : enregistrer une demande)
             # Assurez-vous de bien avoir le modèle pour la demande de service
-            Service.objects.create(client=utilisateur, service=demandeservice['service'],
+            DemandeService.objects.create(client=utilisateur, service=demandeservice['service'],
                                    description=demandeservice['description'])
             del request.session['demandeservice']  # Supprimer la demande après traitement
 

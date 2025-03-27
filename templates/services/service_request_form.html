@@ -1,0 +1,74 @@
+{% extends 'base.html' %} {% block content %}
+<h1>{{ service.name }}</h1>
+<p>{{ service.description }}</p>
+
+<h2>Sous-services disponibles</h2>
+<form method="post" enctype="multipart/form-data">
+  {% csrf_token %} {{ form.non_field_errors }}
+
+  <!-- Choix du service principal -->
+  <div class="form-group">
+    <label for="id_service">Service :</label>
+    {{ form.service }}
+  </div>
+  <!-- Autres champs -->
+
+  <div class="form-group">
+    {{ form.description.label_tag }} {{ form.description }}
+  </div>
+
+  <div class="form-group">
+    {{ form.documents.label_tag }} {{ form.documents }}
+  </div>
+  <h3>Choisissez les sous-services:</h3>
+  <div class="subservices-list">
+    {% for subservice in subservices %}
+    <div class="subservice-item">
+      <label>
+        <input
+          type="checkbox"
+          name="subservices"
+          value="{{ subservice.id }}"
+          class="subservice-checkbox"
+          data-price="{{ subservice.price }}"
+        />
+        {{ subservice.name }} - {{ subservice.price }}€
+      </label>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="total-price">
+    <h3>Prix total: <span id="totalPrice">0</span>€</h3>
+  </div>
+
+  <h3>Documents:</h3>
+  {{ document_formset.management_form }} {% for form in document_formset %}
+  <div class="document-form">{{ form.as_p }}</div>
+  {% endfor %}
+
+  <button type="submit" class="btn btn-primary">Soumettre la demande</button>
+</form>
+
+<script>
+  // JavaScript pour calculer le prix total
+  document.addEventListener("DOMContentLoaded", function () {
+    const checkboxes = document.querySelectorAll(".subservice-checkbox");
+    const totalPriceElement = document.getElementById("totalPrice");
+
+    checkboxes.forEach((checkbox) => {
+      checkbox.addEventListener("change", updateTotalPrice);
+    });
+
+    function updateTotalPrice() {
+      let total = 0;
+      checkboxes.forEach((checkbox) => {
+        if (checkbox.checked) {
+          total += parseFloat(checkbox.dataset.price);
+        }
+      });
+      totalPriceElement.textContent = total.toFixed(2);
+    }
+  });
+</script>
+{% endblock %}

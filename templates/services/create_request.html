@@ -1,0 +1,118 @@
+{% extends 'base.html' %} {% block content %}
+<div class="container mt-4">
+  <h1 class="mb-4">Nouvelle demande de service</h1>
+
+  <div class="card mb-4">
+    <div class="card-body">
+      <h2 class="card-title">{{ service.name }}</h2>
+      <p class="card-text">{{ service.description }}</p>
+    </div>
+  </div>
+
+  <form
+    method="post"
+    enctype="multipart/form-data"
+    class="needs-validation"
+    novalidate
+  >
+    {% csrf_token %} {% if form.errors %}
+    <div class="alert alert-danger">
+      <h4>Erreurs dans le formulaire :</h4>
+      {{ form.errors }}
+    </div>
+    {% endif %}
+
+    <div class="mb-3">
+      <label for="{{ form.description.id_for_label }}" class="form-label"
+        >Description de votre demande</label
+      >
+      {{ form.description }} {% if form.description.errors %}
+      <div class="invalid-feedback">{{ form.description.errors }}</div>
+      {% endif %}
+    </div>
+
+    <div class="mb-3">
+      <label for="{{ form.fichier.id_for_label }}" class="form-label"
+        >Document joint (optionnel)</label
+      >
+      {{ form.fichier }} {% if form.fichier.errors %}
+      <div class="invalid-feedback">{{ form.fichier.errors }}</div>
+      {% endif %}
+    </div>
+
+    <h3 class="mb-3">Sous-services disponibles</h3>
+    <div class="row">
+      {% for subservice in subservices %}
+      <div class="col-md-6 mb-3">
+        <div class="card">
+          <div class="card-body">
+            <div class="form-check">
+              <input
+                type="checkbox"
+                class="form-check-input subservice-checkbox"
+                name="sub_services"
+                value="{{ subservice.id }}"
+                id="subservice_{{ subservice.id }}"
+                data-price="{{ subservice.price }}"
+              />
+              <label
+                class="form-check-label"
+                for="subservice_{{ subservice.id }}"
+              >
+                {{ subservice.name }}
+              </label>
+            </div>
+            <p class="text-muted mb-0">Prix : {{ subservice.price }}€</p>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div class="card mb-4">
+      <div class="card-body">
+        <h3 class="card-title">
+          Prix total : <span id="totalPrice" class="text-primary">0</span>€
+        </h3>
+      </div>
+    </div>
+
+    <div class="d-grid gap-2">
+      <button type="submit" class="btn btn-primary btn-lg">
+        Soumettre la demande
+      </button>
+    </div>
+  </form>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const checkboxes = document.querySelectorAll(".subservice-checkbox");
+    const totalPriceElement = document.getElementById("totalPrice");
+
+    function updateTotalPrice() {
+      let total = 0;
+      checkboxes.forEach((checkbox) => {
+        if (checkbox.checked) {
+          total += parseFloat(checkbox.dataset.price);
+        }
+      });
+      totalPriceElement.textContent = total.toFixed(2);
+    }
+
+    checkboxes.forEach((checkbox) => {
+      checkbox.addEventListener("change", updateTotalPrice);
+    });
+
+    // Validation du formulaire
+    const form = document.querySelector("form");
+    form.addEventListener("submit", function (event) {
+      if (!form.checkValidity()) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+      form.classList.add("was-validated");
+    });
+  });
+</script>
+{% endblock %}
