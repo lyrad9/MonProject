@@ -66,7 +66,7 @@ td[colspan="4"] {
 
 </style>
 <a href="{% url 'dashboard' %}" class="btn">Retour</a>
-    <h2>Liste des devis - {{ statut }}</h2>
+    <h2>Liste des facture - {{ statut }}</h2>
     <table>
         <tr>
             <th>ID</th>
@@ -75,15 +75,15 @@ td[colspan="4"] {
             <th>Fichier</th>
         </tr>
         <!-- afficher sous forme de table-->
-        {% for devis in devis_list %}
+        {% for facture in facture_list %}
         <tr>
-            <td>{{ devis.id }}</td>
-            <td>{{ devis.date_creation }}</td>
-            <td>{{ devis.calcul_total_ttc }} €</td>
+            <td>{{ facture.numero_facture }}</td>
+            <td>{{ facture.date_creation }}</td>
+            <td>{{ facture.montant_ttc }} €</td>
             <td>
-                <!--verifier s'il y a des fichiers dans la table Devis-->
-                {% if devis.fichier %}
-                    <a href="{{ devis.fichier.url }}" download>Télécharger</a>
+                <!--verifier s'il y a des fichiers dans la table FACTURE-->
+                {% if facture.fichier_pdf %}
+                    <a href="{{ facture.fichier_pdf.url }}" download>Télécharger</a>
                 {% else %}
                     Pas de fichier
                 {% endif %}
@@ -91,7 +91,7 @@ td[colspan="4"] {
         </tr>
         {% empty %}
         <tr>
-            <td colspan="4">Aucun devis disponible</td>
+            <td colspan="4">Aucune facture disponible</td>
         </tr>
         {% endfor %}
     </table>

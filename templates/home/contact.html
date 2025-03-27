@@ -1,21 +1,252 @@
-{% extends 'base.html' %} <!-- Hérite de la structure de base.html -->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contactez-nous</title>
+    <style>
+        body {
+             font-family: Arial, sans-serif;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f7f7f7;
+        }
 
-{% block title %}contact{% endblock %} <!-- Définir un titre personnalisé -->
-{% block contact %}<a href="{% url 'contact' %}"></a>{% endblock %}
-{% block body %}
-    <center>
-       <div class="formulaire">
-    <form>
-        <label for="name">Nom :</label>
-        <input type="text" id="name" name="name" required><br><br>
+        .container {
+             width: 80%;
+            max-width: 900px;
+            display: flex;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            overflow: hidden; /* Ensure rounded corners work */
+        }
 
-        <label for="email">Email :</label>
-        <input type="email" id="email" name="email" required> <br><br>
+        .contact-section {
+            flex: 1;
+            padding: 30px;
+            background-color: #fff;
+        }
 
-        <label for="message">Message :</label>
-        <textarea id="message" name="message" cols="30" rows="5" placeholder="decrivez votre besoin" required></textarea><br>
-        <br>
-        <button type="submit">Envoyer</button>
-      </form></div>
-    </center>
-{% endblock %}
+        .image-section {
+            flex: 1;
+            background-image: url("/media/images/1.jpg"); /* Remplacez par l'URL de votre image */
+            background-size: cover;
+            background-position: center;
+            margin-top: 10px;
+        }
+
+        .logo {
+            width: 100px;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        p {
+            color: #777;
+            font-size: 15px;
+            margin-bottom: 30px;
+            font-weight: bold;
+        }
+
+        .form-group {
+            margin-bottom: 5px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+            margin-top: 5px;
+            font-size: 1em;
+        }
+
+        textarea {
+            resize: vertical;
+            height: 120px;
+        }
+
+        .error {
+            color: red;
+            font-size: 14px;
+        }
+
+        button {
+            background-color: #673ab7;
+            color: white;
+            padding: 14px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 1.1em;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #512da8;
+        }
+
+         /* 🔹 MODAL STYLES 🔹 */
+        /* Style de la boîte modale */
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        justify-content: center;
+        align-items: center;
+    }
+
+    .modal-content {
+        background: #fff;
+        padding: 20px;
+        border-radius: 10px;
+        text-align: center;
+        width: 350px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .modal-content button {
+        margin: 10px;
+        padding: 10px 15px;
+        border: none;
+        border-radius: 5px;
+        font-size: 16px;
+        cursor: pointer;
+    }
+
+     .btn-primary {
+        background-color: #007bff;
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background-color: #0056b3;
+    }
+
+        @media (max-width: 768px) {
+            .container {
+                width: 95%;
+                flex-direction: column;
+            }
+
+            .image-section {
+                height: 200px;
+            }
+
+            .contact-section {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="contact-section">
+        <img src="/media/images/logo jeoline.PNG" alt="Image description" class="logo">
+        <h2>Contactez-nous</h2>
+        <p>Remplissez le formulaire ci-dessous et nous vous répondrons rapidement.</p>
+
+        <form id="contact-form" method="POST" action="{% url 'contact_view' %}" >
+             {% csrf_token %} <!-- Protection CSRF -->
+            <div class="form-group">
+                <label for="name">Nom</label>
+                <input type="text" id="name" name="name" required>
+                <span class="error" id="error-name"></span>
+            </div>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required>
+                <span class="error" id="error-email"></span>
+            </div>
+            <div class="form-group">
+                <label for="message">Message</label>
+                <textarea id="message" name="message" required></textarea>
+                <span class="error" id="error-message"></span>
+            </div>
+
+            <button type="submit">Envoyer</button>
+        </form>
+    </div>
+    <div class="image-section"></div>
+</div>
+
+<!-- Boîte MODAL (Fenêtre de confirmation) -->
+<div class="modal" id="authModal">
+    <div class="modal-content">
+       <p>Votre requête a été prise en compte. Nous vous contacterons au plus tôt.</p>
+        <button class="btn-primary" onclick="redirectToLogin()">okay</button>
+    </div>
+</div>
+
+<!--document.getElementById("contact-form").addEventListener("submit", function(event) {
+    event.preventDefault(); // Empêche l'envoi du formulaire par défaut
+
+    let isValid = true;
+    let name = document.getElementById("name").value.trim();
+    let email = document.getElementById("email").value.trim();
+    let message = document.getElementById("message").value.trim();
+
+// reinitialisation des erreurs
+    document.getElementById("error-name").textContent = "";
+    document.getElementById("error-email").textContent = "";
+    document.getElementById("error-message").textContent = "";
+
+//verification des champs
+    if (name === "") {
+        document.getElementById("error-name").textContent = "Le nom est obligatoire.";
+        isValid = false;
+    }
+
+    if (email === "" || !email.includes("@")) {
+        document.getElementById("error-email").textContent = "Veuillez entrer un email valide.";
+        isValid = false;
+    }
+
+    if (message === "") {
+        document.getElementById("error-message").textContent = "Veuillez entrer un message.";
+        isValid = false;
+    }
+
+    if (isValid) {
+        // Réinitialiser le formulaire après confirmation
+        document.getElementById("contact-form").reset();
+    }
+});-->
+<script>
+    function openAuthModal() {
+        document.getElementById("authModal").style.display = "flex";
+    }
+
+    function redirectToLogin() {
+        window.location.href = "{% url 'login' %}";
+    }
+
+    // Vérifier si on doit afficher la boîte modale après l'envoi
+    {% if show_modal %}
+        openAuthModal();
+    {% endif %}
+</script>
+
+</body>
+</html>

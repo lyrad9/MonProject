@@ -2,8 +2,8 @@
 
 from django.urls import  path
 
-from utilisateurs.views import client_dashbord
-from utilisateurs.views import register, logOut, logIn, activate_account, apropos, contact, home
+from utilisateurs.views import client_dashbord, contact_view
+from utilisateurs.views import register, logOut, logIn, activate_account, apropos, home
 from django.contrib.auth import views as  auth_views
 
 urlpatterns  = [
@@ -14,7 +14,7 @@ urlpatterns  = [
     path('login',logIn,name='login'),
 
     path('apropos/', apropos, name='apropos'),
-    path('contact/', contact, name='contact'),
+    path('contact/', contact_view, name='contact_view'),
 
     path('client_dashbord/', client_dashbord, name='client_dashbord'),
 

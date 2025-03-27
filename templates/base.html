@@ -45,23 +45,23 @@ header {
 
 
 /* Navigation */
-nav {
-    display: flex;
-    gap: 20px;
-}
-
 nav a {
     text-decoration: none;
     color: #000;
     font-weight: bold;
-    font-size: 20px;
-    transition: color 0.1s, transform 0.1s;
+    font-size: 18px;
+    transition: color 0.3s ease-in-out, transform 0.2s;
+    padding: 10px 15px;
+    border-radius: 5px;
 }
 
 nav a:hover {
-    background-color: #c0c1c2;
-    transform: scale(1.1);
+    background-color: #007bff;
+    color: white;
+    transform: scale(1.05);
+    box-shadow: 0px 2px 10px rgba(0, 123, 255, 0.3);
 }
+
 .dropdown {
     position: relative;
     display: inline-block;
@@ -188,19 +188,20 @@ footer {
      text-decoration: none;
 }
 button {
-    background-color: #83aae1; /* bleue */
+    background-color: #007bff;
+    color: white;
     border: none;
-    padding: 10px 15px;
-    margin-top: -25x;
+    padding: 12px 20px;
     font-size: 16px;
     cursor: pointer;
     font-weight: bold;
     border-radius: 5px;
-    color:  #007bff;
-    transition: background-color 0.2s;
+    transition: all 0.3s ease-in-out;
 }
+
 button:hover {
-    background-color: #9fc4e8; /* Rouge foncé */
+    background-color: #0056b3;
+    transform: scale(1.05);
 }
 main {
     flex: 1;
@@ -418,7 +419,7 @@ footer {
                 </div>
             </div>
 
-            {% block contact %}<a href="{% url 'contact' %}">Contact</a>{% endblock %}
+            {% block contact %}<a href="{% url 'contact_view' %}">Contact</a>{% endblock %}
         </nav>
         <div class="buttons">
 
@@ -479,4 +480,5 @@ footer {
 
     <script src="{% static 'javaScripts/home.js' %}"></script> <!-- JavaScript avec les fichiers statiques -->
 </body>
+<!-- https://chatgpt.com/canvas/shared/67e4ca3884cc8191b8304874d992e374-->
 </html>

@@ -1,7 +1,9 @@
 {% extends 'base.html' %}
 
+
 {% block mon_compte %}
-    <button type="submit"><a href="{% url 'devis_form' %}">Demander un service</a></button>
+    <button class="btn"><a href="{% url 'devis_form' %}" style="color: white; text-decoration: none;">Demander un service</a></button>
+
 {% endblock %}
 
 {% block content %}
@@ -79,10 +81,17 @@ ul :hover {
 .hidden {
     display: none;
 }
-
+/* amelioration de la taille des cards */
 #factures  .card{
     width: 200px;
 }
+#services .card{
+     width: 200px;
+}
+#devis .card{
+     width: 200px;
+}
+
 
 /* Cards */
 .card {
@@ -109,17 +118,20 @@ ul :hover {
 }
 
 .btn {
+    display: inline-block;
     background-color: #007bff;
-    color: #fff;
-    border: none;
-    padding: 10px 15px;
+    color: white;
+    padding: 10px 20px;
     border-radius: 5px;
-    cursor: pointer;
+    text-decoration: none;
+    text-align: center;
+    font-weight: bold;
 }
 
 .btn:hover {
     background-color: #0056b3;
 }
+
 span {
     color: #007bff;
     font-size: 40px;
@@ -142,23 +154,57 @@ span {
         width: 100%;
     }
 }
+/* responsive mobile */
+@media (max-width: 768px) {
+    .sidebar {
+        display: none;
+    }
+    .sidebar.hidden {
+        display: block;
+    }
+}
+#menu-toggle{
+    width: 80px;
+    height:  50px;
+    font-size: 15px;
+    margin-left: 10px;
+    background-color: #e7e3e3;
+    color:#000;
+}
+
 
 
 </style>
 
 <body>
+ <button id="menu-toggle" class="btn">☰</button>
     <div class="dashboard">
         <aside class="sidebar">
             <ul>
                 <li data-section="notification" class="sidebar-link">Notifications</li>
                 <li data-section="services" class="sidebar-link active">Mes demandes de services</li>
-                <li data-section="factures" class="sidebar-link">Mes factures</li>
                  <li data-section="devis" class="sidebar-link">Mes devis</li>
+                <li data-section="factures" class="sidebar-link">Mes factures</li>
 
             </ul>
         </aside>
 
         <main class="content">
+
+                        <!-- Section Notifications -->
+            <section id="notification" class="content-section hidden">
+                <div class="card">
+                    <h5>Dernières notifications</h5>
+                    <ul>
+                        {% for notification in notifications %}
+                            <li>{{ notification.message }} - <small>{{ notification.date }}</small></li>
+                        {% empty %}
+                            <li>Aucune notification</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </section>
+
             <!-- Section des demandes de service -->
             <section id="services" class="content-section">
                 <div class="card">
@@ -169,12 +215,12 @@ span {
                  <div class="card">
                     <h5>Validees</h5>
                      <p><span id="demandes_validees">{{ demandes_validees }}</span></p>
-                     <a href="{% url 'voir_demandes_par_statut' 'VALIDÉ' %}" class="btn">Voir</a>
+                     <a href="{% url 'voir_demandes_par_statut' 'VALIDÉE' %}" class="btn">Voir</a>
                 </div>
                 <div class="card">
                     <h5>Refusees</h5>
                      <p><span id="demandes_refusees">{{ demandes_refusees }}</span></p>
-                    <a href="{% url 'voir_demandes_par_statut' 'REFUSÉ' %}" class="btn">Voir</a>
+                    <a href="{% url 'voir_demandes_par_statut' 'REFUSÉE' %}" class="btn">Voir</a>
                 </div>
             </section>
 
@@ -184,17 +230,17 @@ span {
                 <div class="card">
                     <h5>Factures en attente</h5>
                    <p> <span id="factures_attente">{{ factures_attente }}</span></p>
-                    <button class="btn">Voir facture</button>
+                    <a href="{% url 'voir_facture' 'EN_ATTENTE' %}" class="btn">Voir</a>
                 </div>
                 <div class="card">
                     <h5>Factures impayées</h5>
                    <p> <span id="factures_impayees">{{ factures_impayees }}</span></p>
-                    <button class="btn">Voir facture</button>
+                    <a href="{% url 'voir_facture' 'IMPAYEE' %}" class="btn">Voir</a>
                 </div>
                 <div class="card">
                     <h5>Factures payées</h5>
                    <p><span id="factures_payees">{{ factures_payees }}</span></p>
-                    <button class="btn">Voir facture</button>
+                    <a href="{% url 'voir_facture' 'PAYEE' %}" class="btn">Voir</a>
                 </div>
             </section>
 
@@ -264,6 +310,44 @@ span {
 
 // Rafraîchir toutes les 3 secondes
 setInterval(refreshDashboard, 3000);
+
+        //pour une meilleure gestion responsive
+
+        document.getElementById("menu-toggle").addEventListener("click", function() {
+    document.querySelector(".sidebar").classList.toggle("hidden");
+});
+
+        // Sécuriser l’actualisation AJAX : vérification de session et annuler l’actualisation si l’utilisateur est déconnecté.
+
+        function refreshDashboard() {
+    fetch("{% url 'refresh_dashboard' %}")
+    .then(response => {
+        if (!response.ok) {
+            throw new Error("Utilisateur déconnecté");
+        }
+        return response.json();
+    })
+    .then(data => {
+        document.getElementById("demandes_attente").innerText = data.demandes_en_attente;
+        document.getElementById("demandes_validees").innerText = data.demandes_validees;
+        document.getElementById("demandes_refusees").innerText = data.demandes_refusees;
+        document.getElementById("factures_attente").innerText = data.factures_attente;
+        document.getElementById("factures_impayees").innerText = data.factures_impayees;
+        document.getElementById("factures_payees").innerText = data.factures_payees;
+        document.getElementById("devis_attente").innerText = data.devis_attente;
+        document.getElementById("devis_valides").innerText = data.devis_valides;
+        document.getElementById("devis_refuses").innerText = data.devis_refuses;
+    })
+    .catch(error => {
+        console.warn("Arrêt de l'actualisation : ", error);
+        clearInterval(refreshInterval);
+    });
+}
+
+// Lancer l’actualisation
+const refreshInterval = setInterval(refreshDashboard, 3000);
+
+
     </script>
 
 <!--AJAX (Asynchronous JavaScript and XML) est une technologie qui permet d’envoyer et de recevoir

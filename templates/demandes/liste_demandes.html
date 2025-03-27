@@ -95,7 +95,7 @@ th {
             {% for demande in demandes %}
             <tr>
                 <td>{{ demande.id }}</td>
-                <td>{{ demande.date_envoi }}</td>
+                <td>{{ demande.date_creation }}</td>
                 <td>
                     {% if demande.fichier %}
                         <a href="{{ demande.fichier.url }}" target="_blank">Voir le fichier</a>
@@ -106,7 +106,8 @@ th {
                 <td>
                     {% if demande.statut == "EN_ATTENTE" %}
                         <a href="{% url 'modifier_demande' demande.id %}" class="btn btn-warning">Modifier</a>
-                    {% elif demande.statut in "VALIDÉ, REFUSÉ" %}
+                    {% elif demande.statut == "VALIDÉE" or demande.statut == "REFUSÉE" %}
+                        <a href="{% url 'modifier_demande' demande.id %}" class="btn btn-warning">Modifier</a>
                         <a href="{% url 'supprimer_demande' demande.id %}" class="btn btn-danger" onclick="return confirmSuppression(event)">Supprimer</a>
                     {% endif %}
                 </td>
