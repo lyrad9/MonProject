@@ -1,5 +1,7 @@
-
+from django.conf import settings
 from django.contrib import admin
+from django.core.mail import send_mail
+
 from Gestion_Service.models import Facture, DemandeService, Service, Categorie, Devis
 
 
@@ -20,7 +22,6 @@ class AdminCategorie(admin.ModelAdmin):
 class AdminFacture(admin.ModelAdmin):
     list_display = ('devis' ,'get_client', 'get_service', 'date_creation','statut','bouton_generer_facture')
     list_filter = ('statut', 'devis')
-    search_fields = ('statut',)
     readonly_fields = ('date_creation',)
     actions = ['generer_pdf']
 
@@ -55,27 +56,88 @@ class AdminFacture(admin.ModelAdmin):
 ##############################################################################
 
 class AdminDemandeService(admin.ModelAdmin):
-    list_display = ('service', 'statut', 'client','date_creation','fichier_link')
+    # Définition des colonnes visibles dans la liste des demandes
+    list_display = ('service', 'statut', 'client', 'date_creation', 'fichier_link')
+
+    # Ajout de filtres pour faciliter la recherche
     list_filter = ('statut', 'date_creation')
-    search_fields = ('statut',)
+
+    # Les champs en lecture seule (l'admin ne peut pas les modifier directement)
     readonly_fields = ('date_creation',)
 
+    # Ajout des actions personnalisées
+    actions = ['valider_demandes', 'refuser_demandes']
+
     def fichier_link(self, obj):
+        """
+        Affiche un lien de téléchargement si un fichier est joint à la demande.
+        """
         if obj.fichier:
-            return format_html('<a href="{}" target="_blank">Télécharger</a>', obj.fichier.url)  # Correction ici
+            return format_html('<a href="{}" target="_blank">Télécharger</a>', obj.fichier.url)
         return "Aucun fichier"
-    
+
+    # Nom personnalisé pour la colonne dans l'admin
     fichier_link.short_description = "Fichier"
 
-    actions = ['marquer_comme_traite']
+    def valider_demandes(self, request, queryset):
+        """
+        Action permettant de valider plusieurs demandes en une seule fois.
+        - Met à jour le statut des demandes en "VALIDÉE"
+        - Envoie un email automatique aux clients concernés
+        """
+        #QuerySet (une liste d'objets Django).
 
-    def marquer_comme_traite(self, request, queryset):
-        queryset.update(statut='Traité')
-        self.message_user(request, "Les demandes ont été marquées comme traitées.")
-    marquer_comme_traite.short_description = "Marquer comme traité"
+        queryset.update(statut='VALIDÉE')  # Met à jour toutes les demandes sélectionnées
+
+        for demande in queryset:
+            self.envoyer_email_notification(demande, "validée")  # Envoi d'un email au client
+
+        self.message_user(request, "Les demandes sélectionnées ont été validées avec succès.")
+
+    # Nom affiché dans le menu des actions admin
+    valider_demandes.short_description = "Valider les demandes sélectionnées"
+
+    def refuser_demandes(self, request, queryset):
+        """
+        Action permettant de refuser plusieurs demandes en une seule fois.
+        - Met à jour le statut des demandes en "REFUSÉE"
+        - Envoie un email automatique aux clients concernés
+        """
+        queryset.update(statut='REFUSÉE')  # Met à jour toutes les demandes sélectionnées
+
+        for demande in queryset:
+            self.envoyer_email_notification(demande, "refusée")  # Envoi d'un email au client
+
+        self.message_user(request, "Les demandes sélectionnées ont été refusées.")
+
+    # Nom affiché dans le menu des actions admin
+    refuser_demandes.short_description = "Refuser les demandes sélectionnées"
+
+    def envoyer_email_notification(self, demande, statut):
+        """
+        Envoie un email au client lorsque sa demande est validée ou refusée.
+        - Paramètres :
+            - demande : L'objet DemandeService concerné
+            - statut : "validée" ou "refusée"
+        """
+        sujet = f"Votre demande a été {statut}"
+        message = f"""
+        Bonjour {demande.client.username},
+
+        Votre demande de service a été {statut} par l'administrateur.
+
+        Détails de votre demande :
+        - ID : {demande.id}
+        - Service : {demande.service.nom}
+        - Date de création : {demande.date_creation.strftime('%d/%m/%Y')}
+
+        Merci de votre confiance.
+        """
+        # Envoi de l'email au client
+        send_mail(sujet, message, settings.DEFAULT_FROM_EMAIL, [demande.client.email])
 
 
-#############################################################################
+############################################################################################
 from django.urls import reverse
 from django.utils.html import format_html
 

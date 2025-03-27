@@ -28,7 +28,7 @@ def service_gl(request):
 def devis_form(request):
     # Récupérer tous les services disponibles pour le formulaire
     services = Service.objects.all()
-    show_modal = False  # Par défaut, ne pas afficher la modale
+   # show_modal = False  # Par défaut, ne pas afficher la modale
 
     # Si la méthode HTTP est POST, cela signifie que le formulaire a été soumis
     if request.method == "POST":
@@ -80,7 +80,6 @@ def devis_form(request):
                 description=description,
                 service=service,
                 fichier=fichier,  # stockage du fichier
-                montant=0,  # Le montant sera mis à jour plus tard
                 client=request.user,  # Associe la demande à l'utilisateur (client) qui l'a soumise
                 statut='EN_ATTENTE'  # La demande est initialement en attente
             )
@@ -116,8 +115,8 @@ def dashboard(request):
 
     # Récupérer les demandes de l'utilisateur
     demandes_attente = DemandeService.objects.filter(client=user, statut='EN_ATTENTE').count()
-    demandes_validees = DemandeService.objects.filter(client=user, statut='VALIDEE').count()
-    demandes_refusees = DemandeService.objects.filter(client=user, statut='REFUSEE').count()
+    demandes_validees = DemandeService.objects.filter(client=user, statut='VALIDÉE').count()
+    demandes_refusees = DemandeService.objects.filter(client=user, statut='REFUSÉE').count()
 
 
     #On récupère les Devis en filtrant via demande__client=user.
@@ -165,8 +164,8 @@ def refresh_dashboard(request):
 #dictionnaire Python qui contient différentes statistiques basées sur les demandes de service et les factures de l'utilisateur connecté.
     data = {
         "demandes_en_attente": DemandeService.objects.filter(client=user, statut='EN_ATTENTE').count(),
-        "demandes_validees" : DemandeService.objects.filter(client=user, statut='VALIDEE').count(),
-        "demandes_refusees": DemandeService.objects.filter(client=user, statut='REFUSEE').count(),
+        "demandes_validees" : DemandeService.objects.filter(client=user, statut='VALIDÉE').count(),
+        "demandes_refusees": DemandeService.objects.filter(client=user, statut='REFUSÉE').count(),
 
         "devis_attente": Devis.objects.filter(demande__client=user, statut='EN_ATTENTE').count(),
         "devis_valides": Devis.objects.filter(demande__client=user, statut='VALIDÉ').count(),
@@ -187,15 +186,18 @@ from django.core.files.storage import default_storage
 
 
 def voir_demandes_par_statut(request, statut):
-    user = request.user
     """Affiche la liste des demandes du client selon leur statut"""
+    # Vérification du mapping des statuts
+
     demandes = DemandeService.objects.filter(client=request.user, statut=statut)
+
+    print(f"Demandes avec statut {statut} :", list(demandes))
 
     return render(request, 'demandes/liste_demandes.html', {'demandes': demandes, 'statut': statut})
 
 
 def modifier_demande(request, demande_id):
-    user = request.user
+
     """Permet au client de modifier sa demande et de la remettre en attente"""
     demande = get_object_or_404(DemandeService, id=demande_id, client=request.user)
 
@@ -231,11 +233,11 @@ def modifier_demande(request, demande_id):
 
 
 def supprimer_demande(request, demande_id):
-    user = request.user
+
     """Supprime une demande validée ou refusée"""
     demande = get_object_or_404(DemandeService, id=demande_id, client=request.user)
 
-    if demande.statut in ["VALIDÉ", "REFUSÉ"]:
+    if demande.statut in ["VALIDÉE", "REFUSÉE"]:
         if demande.fichier:
             default_storage.delete(demande.fichier.path)  # Supprime le fichier associé
         demande.delete()
@@ -272,20 +274,24 @@ def generate_devis_pdf(request, demande_id):  #http://127.0.0.1:8000/devis/gener
     if not demande.client:
         return HttpResponse("Erreur : cette demande n'a pas de client associé.", status=404)
 
-    
+
     # Affichage des informations de la demande et de l'utilisateur pour déboguer
     print(demande.client)
     print("Demande Service ID:", demande.id)
     print("Client associé : ", demande.client.username)
 
-    # récupérer un devis existant pour cette demande. S'il n'existe pas, on en crée un nouveau.
-    # "created" = booléen qui indique si le devis a été créé (True) ou s'il existait déjà (False).
-    devis, created = Devis.objects.get_or_create(demande=demande)
+
+    # Vérifie si un devis existe déjà
+    devis = Devis.objects.filter(demande=demande).first()
 
     # Si un devis existe déjà et qu'il a déjà un fichier PDF associé, on renvoie un lien pour télécharger ce fichier.
-    if not created and devis.fichier:
+    if not devis and devis.fichier:
         return HttpResponse(f"Devis déjà existant ! <a href='{devis.fichier.url}' target='_blank'>Télécharger</a>")
 
+    # récupérer un devis existant pour cette demande. S'il n'existe pas, on en crée un nouveau.
+    # "created" = booléen qui indique si le devis a été créé (True) ou s'il existait déjà (False).
+    if not devis:
+        devis = Devis.objects.get_or_create(demande=demande)
 
     #2.dictionnaire context qui contient toutes les informations nécessaires pour générer le devis (nom du client, email, entreprise, etc.).
 
@@ -339,9 +345,11 @@ def generate_devis_pdf(request, demande_id):  #http://127.0.0.1:8000/devis/gener
     # 🔹 6. On enregistre le fichier PDF dans le champ fichier du modèle Devis.
     devis.fichier.save(devis_filename, ContentFile(pdf_file), save=True)
 
-
     # 🔹 7. renvoie une réponse HTTP avec un lien pour télécharger le fichier PDF.
-    pdf_url = settings.MEDIA_URL + f"devis/{devis_filename}"
+    pdf_url = devis.fichier.url  # Django construit automatiquement le bon chemin
+
+    print("Fichier enregistré:", devis.fichier.path)  # Chemin sur le disque
+    print("URL du fichier:", devis.fichier.url)  # URL publique
 
     # envoyer email à l'utilisateur correspondant
 
@@ -353,7 +361,7 @@ def generate_devis_pdf(request, demande_id):  #http://127.0.0.1:8000/devis/gener
     send_mail(
         subject='devis envoye',
         message=f"""Votre devis pour un {service_nom} a ete envoyer.
-        Vous pouvez le telechage en cliquant sur ce lien : http://127.0.0.1:8000/media/devis/devis_1.pdf 
+        Vous pouvez le telechage en cliquant sur ce lien :  {request.build_absolute_uri(devis.fichier.url)}
         ou Veuillez vous connectez pour le voir.""",
         from_email=settings.ADMIN_EMAIL,
         recipient_list=[demande.client.email],
@@ -389,63 +397,17 @@ def voir_devis(request, statut):
     #On utilise le modèle Devis pour récupérer tous les devis qui correspondent à deux critères (le client associe a la demande et le statut)
     devis_list = Devis.objects.filter(demande__client=user, statut=statut,)
 
-    #fonction "render"  pour afficher un template HTML (devis/voir_devis.html) en lui passant un contexte (un dictionnaire de données).
+    #fonction "render" pour afficher un template HTML (devis/voir_devis.html) en lui passant un contexte (un dictionnaire de données).
 
     return render(request, 'devis/voir_devis.html', {'devis_list': devis_list, 'statut': statut,
                                                      'message': "Aucun devis trouvé avec ce statut." if not devis_list else "",})
 
 
-########################################################
-
-# modifier le devis
-
-# views.py
-
-
-''''@login_required
-def edit_devis(request, devis_id):
-    """
-    Permet au client de modifier son devis
-    """
-    devis = get_object_or_404(Devis, id=devis_id)
-
-    # Vérifier que le devis appartient à l'utilisateur connecté
-    if devis.demande.client != request.user:
-        messages.error(request, "Vous n'êtes pas autorisé à modifier ce devis.")
-        return redirect('client_dashboard')
-
-    if request.method == 'POST':
-        # Récupération des données du formulaire HTML
-        nouveau_montant = request.POST.get("montant")
-        nouvelle_description = request.POST.get("description")
-
-        if nouveau_montant and nouvelle_description:
-            devis.montant = float(nouveau_montant)  # Conversion en float pour éviter les erreurs
-            devis.description = nouvelle_description
-            devis.save()
-
-            # Envoyer un email à l'administrateur pour informer de la modification
-            send_mail(
-                'Devis modifié',
-                f'Le devis avec l\'ID {devis.id} a été modifié par {request.user.username}.',
-                request.user.email,  # email du client
-                [settings.ADMIN_EMAIL],  # email de l'admin défini dans settings
-                fail_silently=False,
-            )
-
-            messages.success(request, "Votre devis a été modifié avec succès !")
-            return redirect('client_dashboard')
-
-        else:
-            messages.error(request, "Veuillez remplir tous les champs.")
-
-    return render(request, 'devis/edit_devis.html', {'devis': devis})
-
 #############################################################
 #valider le devis
 
 # views.py
-
+'''
 @login_required
 def validate_devis(request, devis_id):
     """
@@ -533,25 +495,6 @@ def facture_pdf_view(request, facture_id):
         print(f"❌ Erreur générale : {e}")
         return HttpResponse("Erreur interne du serveur.", status=500)
 
-
-#####################################
-
-@login_required
-def voir_facture(request, statut):
-    """
-    Affiche les devis de l'utilisateur en fonction de leur statut (EN_ATTENTE, VALIDÉ, REFUSÉ)
-    """
-    user = request.user
-
-    # Filtrage des devis par utilisateur et statut
-    # On utilise le modèle Devis pour récupérer tous les devis qui correspondent à deux critères (le client associe a la demande et le statut)
-    devis_list = Devis.objects.filter(demande__client=user, statut=statut, )
-
-    # fonction "render"  pour afficher un template HTML (devis/voir_devis.html) en lui passant un contexte (un dictionnaire de données).
-
-    return render(request, 'devis/voir_devis.html', {'devis_list': devis_list, 'statut': statut,
-                                                     'message': "Aucun devis trouvé avec ce statut." if not devis_list else "", })
-
 #############################################################
 
 @login_required
@@ -576,5 +519,22 @@ def telecharger_facture(request, facture_id):
         print(f"❌ Erreur lors de l'ouverture du fichier PDF : {e}")
         return HttpResponse("Erreur lors du téléchargement de la facture.", status=500)
 
+################################################################################################3
+@login_required
+def voir_facture(request, statut):
+    """
+    Affiche les devis de l'utilisateur en fonction de leur statut (EN_ATTENTE, VALIDÉ, REFUSÉ)
+    """
+    user = request.user
 
+    # Filtrage des devis par utilisateur et statut
+    # On utilise le modèle Devis pour récupérer tous les devis qui correspondent à deux critères (le client associe a la demande et le statut)
+    facture_list = Facture.objects.filter(devis__demande__client=user, statut=statut )
+
+    for facture in facture_list:
+        print(f"🔍 Facture {facture.numero_facture} - Fichier PDF : {facture.fichier_pdf}")  # Debug
+
+    # fonction "render" pour afficher un template HTML (devis/voir_devis.html) en lui passant un contexte (un dictionnaire de données).
+
+    return render(request, 'factures/liste_facture.html', {'facture_list': facture_list, 'statut': statut})
 

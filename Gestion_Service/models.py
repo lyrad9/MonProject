@@ -9,6 +9,7 @@ from django.db import models
 from django.template.loader import render_to_string
 
 from django.templatetags.static import static
+from django.utils.timezone import now
 from weasyprint import HTML, CSS
 
 from AppGestionService import settings
@@ -69,8 +70,10 @@ class DemandeService(models.Model):
     description = models.TextField()
     date_creation = models.DateTimeField(auto_now_add=True)
     date_modification = models.DateTimeField(auto_now=True) # mise à jour a chaque modification
+
     service = models.ForeignKey(Service, on_delete=models.CASCADE, related_name="demandes") # est demandé N fois
     client = models.ForeignKey(User, on_delete=models.CASCADE, related_name="demandes") # demande N fois
+    
     fichier = models.FileField(upload_to='demandes/', blank=True, null=True)  # Permetre de stocke un fichier dans la demande lors de l'envois.
 
     #sattut de la demande
@@ -94,12 +97,14 @@ class DemandeService(models.Model):
 # model devis
 from django.core.files.storage import FileSystemStorage
 from decimal import Decimal
+from django.core.validators import MinValueValidator
 
-fs = FileSystemStorage(location='media/devis')
+fs = FileSystemStorage(location='media/')
 
 class Devis(models.Model):
 
-    demande = models.OneToOneField(DemandeService, on_delete=models.CASCADE, related_name='devis')
+    # empêche plusieurs devis pour une meme demande
+    demande = models.OneToOneField(DemandeService, on_delete=models.CASCADE, related_name='devis',unique=True)
     fichier = models.FileField(upload_to='devis/', storage=fs,null=True, blank=True)
     date_creation = models.DateTimeField(auto_now_add=True)
     date_modification = models.DateTimeField(auto_now=True)
@@ -111,8 +116,10 @@ class Devis(models.Model):
 
     validite = models.DateField(auto_now=True)  #
 
-    cout_backend = models.DecimalField(max_digits=15, decimal_places=2,default=0, help_text="Coût_back-end")
-    cout_frontend = models.DecimalField(max_digits=15, decimal_places=2, default=0,help_text="Coût_front-end")
+
+    cout_backend = models.DecimalField(max_digits=15, decimal_places=2, default=0, validators=[MinValueValidator(0)])
+    cout_frontend = models.DecimalField(max_digits=15, decimal_places=2, default=0, validators=[MinValueValidator(0)])
+
     cout_test = models.DecimalField(max_digits=15, decimal_places=2, default=0,help_text="Coût_test") # cout pour les tests
     cout_maintenance = models.DecimalField(max_digits=15, decimal_places=2, default=0,help_text="Coût_maintenance")
 
@@ -194,9 +201,11 @@ class Facture(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.numero_facture:
-            super().save(*args, **kwargs)  # D'abord, on sauvegarde pour obtenir un ID
-            self.numero_facture = f"FAC-{self.pk:06d}"  # Génération du numéro
-        super().save(*args, **kwargs)  # Sauvegarde finale
+            # Génération avant sauvegarde
+            date_part = now().strftime("%Y%m%d")
+            self.numero_facture = f"FAC-{date_part}-{self.pk or 0:06d}"
+
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.numero_facture or self.pk} - {self.montant_ttc} FCFA"
@@ -234,12 +243,15 @@ class Facture(models.Model):
         # On suppose que 'self' est l'instance de la facture
         client = self.get_client()  # Assure-toi que 'get_client' existe dans ton modèle Facture
 
+
         context = {
             # Informations du client
             "client_nom": client.username if client else "Inconnu",
             "client_email": client.email if client else "inconnu@example.com",
-            "client_entreprise": client.entreprise if client else "Nom entreprise non défini",
-            # Si c'est le nom de l'entreprise
+            "client_entreprise": getattr(client, "entreprise", "Nom entreprise non défini"),
+
+            #"client_entreprise": client.entreprise if client else "Nom entreprise non défini",
+
             "client_adresse": client.adresse if client else "Pas d'adresse mentionnée",
 
             # Informations de la facture
