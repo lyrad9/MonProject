@@ -1,4 +1,4 @@
-
+from django.http import JsonResponse
 from django.urls import reverse
 from django.conf import settings
 from django.contrib.auth import authenticate, login, logout, get_user_model
@@ -33,13 +33,13 @@ def client_dashbord(request):
         DemandeService.objects.create(
             description=demandeservice_data['description'],
             service=service,
-            montant=0,  # Le montant par défaut
             client=request.user,
             statut='EN_ATTENTE',
         )
-        messages.success(request, "Votre demande de service a été enregistrée avec succès !")
+        #messages.success(request, "Votre demande de service a été enregistrée avec succès !")
+        return render(request, 'client_dashboard.html', {'show_modal': True})
 
-    return render(request, "users/clients.html")
+    return render(request, "users/clients.html",{'show_modal': False})
 
 #####################################################################################
 #  function : Connexion
@@ -64,7 +64,6 @@ def logIn(request):
                     DemandeService.objects.create(
                         description=demandeservice_temp['description'],
                         service=service,
-                        montant=0,
                         client=user,
                         statut='EN_ATTENTE'
                     )
@@ -166,7 +165,11 @@ def register(request):
             # Traitement de la demande de service ici (exemple : enregistrer une demande)
             # Assurez-vous de bien avoir le modèle pour la demande de service
             DemandeService.objects.create(client=utilisateur, service=demandeservice['service'],
+<<<<<<< HEAD
                                    description=demandeservice['description'])
+=======
+                                   description=demandeservice['description'], fichier=demandeservice['fichier'])
+>>>>>>> a7a94a373523b68f79fb08a05a44dd64ee988bb5
             del request.session['demandeservice']  # Supprimer la demande après traitement
 
         return redirect('login')
@@ -213,8 +216,39 @@ def apropos(request):
         return render(request, 'home/apropos.html')
 
 ###################################################################################
-def contact(request):
-    # Ici, tu peux récupérer les informations spécifiques du client (comme entreprise).
 
-    return render(request, 'home/contact.html')
+def contact_view(request):
+    print("Méthode reçue :", request.method)  # Debug
+
+    if request.method == "POST":
+        name = request.POST.get("name")
+        email = request.POST.get("email")
+        message = request.POST.get("message")  # Correction ici
+
+        print("Données reçues :", name, email, message)  # Debug
+
+
+        if not name or not email or not message:
+            messages.error(request, "Tous les champs sont obligatoires.")
+            return render(request, "home/contact.html")  # Afficher la page avec les erreurs
+
+        try:
+            send_mail(
+                subject=f"Message de {name} depuis le formulaire de contact",
+                message=f"Nom: {name}\nEmail: {email}\nMessage: {message}",
+                from_email=email,
+                recipient_list=['edjabeadam1@gmail.com'],  # Mets ton email ici
+                fail_silently=False,
+            )
+            messages.success(request, "Votre message a été envoyé avec succès !")
+            return render(request, "home/contact.html", {"show_modal": True})  # Affichage de la modal
+
+
+        except Exception as e:
+            messages.error(request, "Erreur lors de l'envoi du message. Réessayez.")
+            return render(request, "home/contact.html")
+
+    return render(request, "home/contact.html")  # Charge la page avec le formulaire'''
+
+
 

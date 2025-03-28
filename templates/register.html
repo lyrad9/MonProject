@@ -19,6 +19,26 @@
 </div>
 
 <style>
+  form{
+    padding: 30px;
+    margin: auto;
+     width: 100%;
+    max-width: 430px;
+}
+
+form label {
+    display: block;
+    font-weight: bold;
+  }
+
+   form input, form textarea {
+    width: 95%;
+    padding: 10px;
+    margin-bottom: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 12px;
+
   /* Style de base pour les alertes */
   #alert-container {
     position: fixed;
@@ -77,13 +97,14 @@
   .alert-dismissable button {
     color: white;
   }
+
 </style>
 
 <!-- Formulaire d'inscription -->
-<form method="POST" action="{% url 'register' %}">
+<form method="POST" action="{% url 'register' %}" class="formulaire">
   {% csrf_token %}
   <label for="username">Username :</label>
-  <input type="text" id="username" name="username" placeholder="Nom" required>
+  <input type="text" id="username" name="username" placeholder="Votre Nom complet" required>
   <br><br>
 
   <label for="email">Email :</label>
@@ -91,21 +112,23 @@
   <br><br>
 
   <label for="adresse">Adresse :</label>
-  <input type="text" id="adresse" name="adresse" placeholder="Adresse" required>
+  <input type="text" id="adresse" name="adresse" placeholder="Votre Adresse complete" required>
   <br><br>
 
   <label for="entreprise">Entreprise :</label>
-  <input type="text" id="entreprise" name="entreprise" placeholder="Entreprise">
+  <input type="text" id="entreprise" name="entreprise" placeholder="nom de votre *Entreprise* ou  simplement *particulier* ">
   <br><br>
 
   <label for="password1">Mot de passe :</label>
-  <input type="password" id="password1" name="password1" placeholder="Mot de passe" required>
+  <input type="password" id="password1" name="password1" placeholder="votre Mot de passe" required>
   <br><br>
 
   <label for="password2">Confirmer le mot de passe :</label>
-  <input type="password" id="password1" name="password2" placeholder="Confirmer mot de passe" required>
+  <input type="password" id="password2" name="password2" placeholder="Confirmer mot de passe" required>
   <br><br>
 
   <button type="submit">S'inscrire</button>
 </form>
 {% endblock %}
+
+{% block footer %}  {% endblock %}

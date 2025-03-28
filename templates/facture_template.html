@@ -1,52 +1,63 @@
 <!DOCTYPE html>
+{% load static %}
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Facture {{ facture.pk }}</title>
-    <style>
-        body { font-family: Arial, sans-serif; }
-        .container { width: 80%; margin: auto; }
-        .header { text-align: center; font-size: 20px; font-weight: bold; }
-        .section { margin-bottom: 20px; }
-        table { width: 100%; border-collapse: collapse; }
-        table, th, td { border: 1px solid black; padding: 10px; text-align: left; }
-        .footer { text-align: center; font-size: 12px; margin-top: 20px; }
-    </style>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/facture.css' %}">
+    <title>Facture</title>
 </head>
 <body>
-
-<div class="container">
-    <div class="header">FACTURE N° {{ facture.pk }}</div>
-
-    <div class="section">
-        <strong>Date :</strong> {{ facture.date_creation }}<br>
-        <strong>Client :</strong> {{ facture.get_client.username }}<br>
-        <strong>Service :</strong> {{ facture.get_service.nom }}
-
-    </div>
-
-   <table>
+    <div class="invoice">
+        <div class="logo">
+            <img src="file:///C:/Users/JEEL/PycharmProjects/MonProject/media/images/logo jeoline.PNG" alt="Logo" width="30%">
+        </div>
+        <div class="header">
+            <h1>FACTURE</h1>
+        </div>
+        <div class="details">
+            <div><strong> Jeoline Corporates</strong></div>
+            <div> 264 Rue de la Motte-Picquet Bonanjo, Douala, CAMEROUN</div>
+            <div>Douala, CAMEROUN, 264 Rue de la Motte-Picquet Bonanjo</div>
+            <div> +237 652 21 41 51</div>
+            <div> contact@jeolinecorporates.com</div>
+            <br>
+        </div>
+        <br>
+        <div class="details">
+            <div><strong>client</strong></div>
+            <div>{{ client_nom }}</div>
+            <div>{{ client_adresse }}</div>
+            <div>{{ client_email }}</div>
+            <div>{{ client_telephone }}</div>
+        </div>
+       <table class="items-table">
     <tr>
-        <th>Description</th>
-        <th>Montant HT</th>
-        <th>TVA</th>
-        <th>Total TTC</th>
+        <th>DÉSCRIPTION</th>
+        <th>QUANTITÉ (heures)</th>
+        <th>PRIX</th>
+        <th>TOTAL HT</th>
     </tr>
     <tr>
-        <td>{{ facture.description }}</td>
-        <td>{{ facture.montant }} FCFA</td>
-        <td>{{ facture.taxe|default:"0" }}%</td>
-        <td>{{ facture.total_ttc }} FCFA</td>
+        <td>{{ description }}</td>
+        <td>{{ duree }}</td>
+        <td> / </td>
+        <td>{{ total_ht }}</td>
     </tr>
 </table>
 
-
-    <div class="footer">
-        Merci pour votre confiance.<br>
-        Société XYZ | Génie Logiciel | Web & Mobile
+        <div class="conditions">
+            <p><strong>Remarques / Instructions de paiement :</strong></p>
+            <div><strong>TOTAL HT</strong>: {{ total_ht }}</div>
+            <div><strong>TVA</strong>: {{ tva }}</div>
+            <div><strong>TTC</strong>: {{ total_ttc }}</div>
+        </div>
+        <div class="footer">
+            <div><strong>DATE</strong>: {{ date_creation }}</div>
+            <br>
+            <div><strong>N° DE FACTURE</strong>: {{ facture }}</div>
+            <p>Modalités de paiement (dû à réception, dû apres {{ validite }} )</p>
+        </div>
     </div>
-</div>
-
 </body>
 </html>

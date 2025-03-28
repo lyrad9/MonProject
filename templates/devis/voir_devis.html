@@ -65,6 +65,7 @@ td[colspan="4"] {
 }
 
 </style>
+<a href="{% url 'dashboard' %}" class="btn">Retour</a>
     <h2>Liste des devis - {{ statut }}</h2>
     <table>
         <tr>
@@ -78,7 +79,7 @@ td[colspan="4"] {
         <tr>
             <td>{{ devis.id }}</td>
             <td>{{ devis.date_creation }}</td>
-            <td>{{ devis.demande.montant }} €</td>
+            <td>{{ devis.calcul_total_ttc }} €</td>
             <td>
                 <!--verifier s'il y a des fichiers dans la table Devis-->
                 {% if devis.fichier %}
@@ -94,6 +95,7 @@ td[colspan="4"] {
         </tr>
         {% endfor %}
     </table>
+
 
   {% block footer %} {% endblock %}
 {% endblock %}

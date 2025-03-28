@@ -12,12 +12,102 @@
     <!-- Titre de la page -->
   </head>
 
+<<<<<<< HEAD
   <style>
      body {
         margin: 0;
         padding: 0;
         font-family: Arial, Helvetica, sans-serif ;
         display: flex;
+=======
+<style>
+ body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, Helvetica, sans-serif ;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    color: #000;
+    background-color: #e7e3e3;
+    overflow: auto;
+    height: auto;
+}
+
+/* En-tête */
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 10px;
+    width: 100%;
+    height: 50px;
+    background-color:#ffffff;
+    box-shadow: 0 5px 7px rgba(0, 0, 0, 0.1);
+    color : #000;
+
+}
+/* Logo
+.logo {
+    font-size: 1.5em;
+    font-weight: bold;
+    margin-top: 10px;
+
+}*/
+
+
+/* Navigation */
+nav a {
+    text-decoration: none;
+    color: #000;
+    font-weight: bold;
+    font-size: 18px;
+    transition: color 0.3s ease-in-out, transform 0.2s;
+    padding: 10px 15px;
+    border-radius: 5px;
+}
+
+nav a:hover {
+    background-color: #007bff;
+    color: white;
+    transform: scale(1.05);
+    box-shadow: 0px 2px 10px rgba(0, 123, 255, 0.3);
+}
+
+.dropdown {
+    position: relative;
+    display: inline-block;
+    margin-left: -8px;
+
+}
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #f0f0f0;
+    min-width: 160px;
+    box-shadow: 0 2px 3px rgba(0,0,0,0.2);
+    z-index: 1;
+
+}
+.dropdown-content a {
+    color: rgb(0, 0, 0);
+    padding: 10px 14px;
+    text-decoration: none;
+    display: block;
+    font-weight: bold;
+}
+.dropdown-content a:hover {
+    background-color: #f1f1f1;
+
+}
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    header {
+>>>>>>> a7a94a373523b68f79fb08a05a44dd64ee988bb5
         flex-direction: column;
         min-height: 100vh;
         color: #000;
@@ -81,12 +171,119 @@
         z-index: 1;
 
     }
+<<<<<<< HEAD
     .dropdown-content a {
         color: rgb(0, 0, 0);
         padding: 10px 14px;
         text-decoration: none;
         display: block;
         font-weight: bold;
+=======
+}
+
+header {
+    animation: fadeIn 2s ease-out;
+}
+#home h1{
+   margin: auto;
+    height: 400px;
+   color: #000000;
+   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+   width: 90%;
+}
+#home {
+    animation:fadeIn 2s ease-in ;
+}
+.accueil{
+    display: flex;
+   justify-content: center;
+   text-align: center;
+}
+.accueil img{
+    margin: 20px;
+
+}
+p{
+    margin-left: 10px;
+    margin-top: 10px;
+    color: #000
+}
+h1{
+    margin-top: 30px;
+}
+h3{
+    font-style: oblique;
+    margin-top: 80px;
+    color: #000000;
+}
+
+footer {
+    background-color: #000;
+    color: #007bff;
+    text-align: center;
+    padding: 5px 0;
+    position: relative;
+    bottom: 0;
+    width: 100%;
+
+}
+.buttons {
+    display: flex;
+    gap: 10px;
+    margin-right: 15px;
+}
+.buttons a {
+    color:  #000;
+     text-decoration: none;
+}
+button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    font-weight: bold;
+    border-radius: 5px;
+    transition: all 0.3s ease-in-out;
+}
+
+button:hover {
+    background-color: #0056b3;
+    transform: scale(1.05);
+}
+main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+}
+.image-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+}
+.image-box {
+    text-align: center;
+    width: 200px;
+    background: none;  /* */
+    border-radius: 10px;
+    padding: 10px;
+    margin-right: 40px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+img ::first-letter{
+
+    margin-right: 40px;
+}
+
+@media (max-width: 768px) {
+    .image-box {
+        width: 100%;
+        max-width: 200px;
+>>>>>>> a7a94a373523b68f79fb08a05a44dd64ee988bb5
     }
     .dropdown-content a:hover {
         background-color: #f1f1f1;
@@ -401,8 +598,163 @@
 
 
     }
+<<<<<<< HEAD
   </style>
   <body>
+=======
+}
+footer {
+    background: #222;
+    color: #fff;
+    padding: 0px 0;  /* Réduit la hauteur du footer */
+    text-align: center;
+    position: relative;
+    margin-top: 20px;
+    font-size: 0.9em;  /* Taille de texte plus petite */
+}
+
+.footer-content {
+    display: flex;
+    justify-content: space-around;
+    max-width: 500px;
+    margin: auto;
+    flex-wrap: wrap;
+}
+
+.footer-section {
+    flex: 1;
+    padding: 5px;
+    margin: 5px;
+}
+
+.footer-section h3 {
+    font-size: 1.2em;
+    margin-bottom: 5px;
+}
+
+.footer-section p, .footer-section a {
+    font-size: 1em;
+    color: #fff;
+    text-decoration: none;
+}
+
+.footer-section a:hover {
+    text-decoration: underline;
+}
+
+#horaire-list {
+    list-style: none;
+    padding: 0;
+    margin-top: 5px;
+    display: none; /* Caché au départ */
+    position: absolute;
+    top: 50px; /* Placer la liste juste sous le titre */
+    left: 0;
+    background-color: #333; /* Contexte sombre pour la liste */
+    width: 100%; /* Prendre toute la largeur de la section */
+    padding: 5px;
+}
+
+#horaire-list li {
+    margin: 5px 0;
+}
+
+.ferme {
+    color: #f44336;  /* Couleur pour "Fermé" */
+}
+
+.varier {
+    font-style: italic;
+    color: #ff9800;  /* Couleur pour les horaires variables */
+}
+
+.footer-bottom {
+    margin-top: 5px;
+    border-top: 1px solid #555;
+    padding-top: 5px;
+}
+
+.footer-bottom p {
+    font-size: 0.8em;
+    color: #ccc;
+}
+
+.footer-bottom a {
+    color: #fff;
+    text-decoration: none;
+}
+
+.footer-bottom a:hover {
+    text-decoration: underline;
+}
+
+/*style du formulaire demande de devis*/
+
+.formulaire{
+  display: flex;
+  justify-content: center;
+  margin-top: 50px ;
+}
+
+  form {
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    width: 100%;
+
+    max-width: 400px;
+  }
+
+  form label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+  }
+
+  form input, form textarea {
+    width: 95%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+
+
+  }
+  form select{
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+
+  }
+
+  form button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+  }
+
+  form button:hover {
+    background-color: #0056b3;
+  }
+
+
+</style>
+
+<body>
+{% block entete %}
+>>>>>>> a7a94a373523b68f79fb08a05a44dd64ee988bb5
     <header>
       <div class="logo">
         <a href="{% url 'home' %}">
@@ -419,6 +771,7 @@
         endblock %}
 
         <div class="dropdown">
+<<<<<<< HEAD
           <button
             style="
               margin-top: -20px;
@@ -432,10 +785,37 @@
           </button>
           <div class="dropdown-content">
             <a href="{% url 'service_comptabilite' %}"> Comptabilité </a>
+=======
+                <button style="margin-top: -20px;background: none ;color: #000;
+                font-weight: bold; font-size:20px; "> Services </button>
+                <div class="dropdown-content">
+                   <a href="{% url 'service_comptabilite' %}"> Comptabilité </a>
+
+                   <a href="{% url 'service_gl' %}">genie logiciel</a>
+                </div>
+            </div>
+
+            {% block contact %}<a href="{% url 'contact_view' %}">Contact</a>{% endblock %}
+        </nav>
+        <div class="buttons">
+
+            {% if user.is_authenticated %}
+
+            {% block mon_compte %}<button type="submit"><a href="{% url 'client_dashbord' %}"> mon compte </a></button>{% endblock %}
+            <button type="submit" style="background-color:#ff6363;"><a href="{% url 'logout' %}"> Se déconnecter </a></button>
+
+        {% else %}
+
+    {% block register %}   <button type="submit"><a href="{% url 'register' %}"> S'enregistrer </a></button> {% endblock %}
+    {% block login %}     <button type="submit"><a href="{% url 'login' %}"> Se connecter </a></button>  {% endblock %}
+         {% endif %}
+
+>>>>>>> a7a94a373523b68f79fb08a05a44dd64ee988bb5
 
             <a href="{% url 'service_gl' %}">genie logiciel</a>
           </div>
         </div>
+<<<<<<< HEAD
 
         {% block contact %}<a href="{% url 'contact' %}">Contact</a>{% endblock
         %}
@@ -461,6 +841,9 @@
         {% endblock %} {% endif %}
       </div>
     </header>
+=======
+    </header> {% endblock %}
+>>>>>>> a7a94a373523b68f79fb08a05a44dd64ee988bb5
 
     {% block content %} {% endblock %} {% block footer %}
     <footer>
@@ -505,7 +888,14 @@
     </footer>
     {% endblock %}
 
+<<<<<<< HEAD
     <script src="{% static 'javaScripts/home.js' %}"></script>
     <!-- JavaScript avec les fichiers statiques -->
   </body>
+=======
+
+    <script src="{% static 'javaScripts/home.js' %}"></script> <!-- JavaScript avec les fichiers statiques -->
+</body>
+<!-- https://chatgpt.com/canvas/shared/67e4ca3884cc8191b8304874d992e374-->
+>>>>>>> a7a94a373523b68f79fb08a05a44dd64ee988bb5
 </html>

@@ -325,7 +325,8 @@ footer {
 .formulaire{
   display: flex;
   justify-content: center;
-  margin-top: 50px ;
+
+  margin: auto;
 }
 
   form {

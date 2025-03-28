@@ -1,0 +1,59 @@
+/* Facture générale */
+.invoice {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+    padding: 20px;
+    border: 1px solid #000;
+}
+
+.logo img {
+    display: block;
+    margin: 0 auto;
+}
+
+.header h1 {
+    text-align: center;
+    color: #333;
+    font-size: 2em;
+}
+
+.company-details,
+.client-details {
+    margin-top: 20px;
+}
+
+.company-details div,
+.client-details div {
+    margin-bottom: 5px;
+}
+
+.items-table {
+    width: 100%;
+    margin-top: 30px;
+    border-collapse: collapse;
+}
+
+.items-table th, .items-table td {
+    padding: 8px 12px;
+    text-align: left;
+    border: 1px solid #ddd;
+}
+
+.items-table th {
+    background-color: #f4f4f4;
+}
+
+.conditions {
+    margin-top: 20px;
+    font-size: 1.1em;
+}
+
+.footer {
+    margin-top: 30px;
+    font-size: 0.9em;
+    text-align: center;
+}
+
+.footer p {
+    margin-top: 5px;
+}
